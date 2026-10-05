@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sower</title>
+<meta name="description" content="A Bible verse feed: one verse per swipe, with context, older commentators and share images.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#111712">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sower">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preload" href="fonts/vollkorn-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* The page is built against a small reset that Claude supplies around an artifact; here it is spelled out.
+   The root is padded by the phone's safe areas, and the bands that leaves (behind the status bar and the home
+   indicator) take the dark colour set on html, so the white status-bar text always reads. */
+:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+html{background:#111712;overscroll-behavior:none}
+body{margin:0;overscroll-behavior:none}
+img{max-width:100%}
+[hidden]{display:none!important}
+@font-face{font-family:'Vollkorn';font-style:normal;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-greek-wght-normal.woff2) format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:'Vollkorn';font-style:normal;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Vollkorn';font-style:normal;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Vollkorn';font-style:italic;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-greek-wght-italic.woff2) format('woff2');unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}
+@font-face{font-family:'Vollkorn';font-style:italic;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-latin-ext-wght-italic.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Vollkorn';font-style:italic;font-weight:400 900;font-display:swap;src:url(fonts/vollkorn-latin-wght-italic.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/barlow-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/barlow-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/barlow-latin-ext-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/barlow-latin-ext-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-latin-ext-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-ext-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-ext-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/barlow-semi-condensed-latin-ext-700-normal.woff2) format('woff2')}
+</style>
+<style>
+/* Layout: a one-screen app. Each verse is set over a full-bleed photograph, one per swipe: the picture shows
+   in the upper part and is shaded where the words sit. Controls float above it, detail arrives in bottom
+   sheets, and in-order reading is a quiet page of its own. The six plain "plot" grounds remain for share
+   images and for any card whose picture cannot load. */
+:root{
+  color-scheme:light;
+  --paper:#eef0e6; --surface:#f9faf4; --ink:#18231c; --muted:#566259; --line:#cdd3c4;
+  --accent:#84560a; --accent-ink:#fffdf4; --hl:#f1dfa6; --shadow:rgba(10,14,11,.28);
+  --scrim:rgba(10,14,11,.5); --chip:rgba(10,14,11,.56); --on-chip:#fbfaf2; --chip-ink:#16201a;
+  /* verse grounds (ground / text / seed). Each is a complete surface, the same in both themes. */
+  --soil-g:#2b1c14;  --soil-t:#f4eadb;  --soil-d:#dba63c;
+  --wheat-g:#e2b340; --wheat-t:#2a1a0c; --wheat-d:#8a5a12;
+  --field-g:#1e4a37; --field-t:#f0f1e2; --field-d:#c3d66b;
+  --sky-g:#c5dcea;   --sky-t:#13293b;   --sky-d:#f7fbfd;
+  --clay-g:#a4472a;  --clay-t:#fff4e8;  --clay-d:#2b1c14;
+  --night-g:#161a38; --night-t:#ebe8ff; --night-d:#f0cf66;
+  --serif:"Vollkorn",Georgia,"Times New Roman",serif;
+  --label:"Barlow Semi Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --ui:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#111712; --surface:#1a221c; --ink:#e8ebdc; --muted:#9ba794; --line:#2e3a31;
+    --accent:#e3b448; --accent-ink:#1d1606; --hl:#4d3f12; --shadow:rgba(0,0,0,.5); --scrim:rgba(0,0,0,.62);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#111712; --surface:#1a221c; --ink:#e8ebdc; --muted:#9ba794; --line:#2e3a31;
+  --accent:#e3b448; --accent-ink:#1d1606; --hl:#4d3f12; --shadow:rgba(0,0,0,.5); --scrim:rgba(0,0,0,.62);
+}
+.plot-soil{--g:var(--soil-g);--t:var(--soil-t);--d:var(--soil-d)}
+.plot-wheat{--g:var(--wheat-g);--t:var(--wheat-t);--d:var(--wheat-d)}
+.plot-field{--g:var(--field-g);--t:var(--field-t);--d:var(--field-d)}
+.plot-sky{--g:var(--sky-g);--t:var(--sky-t);--d:var(--sky-d)}
+.plot-clay{--g:var(--clay-g);--t:var(--clay-t);--d:var(--clay-d)}
+.plot-night{--g:var(--night-g);--t:var(--night-t);--d:var(--night-d)}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.45;overflow:hidden;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+svg{display:block}
+#app{position:relative;height:100%;max-width:480px;margin-inline:auto;overflow:hidden;background:var(--paper)}
+@media (min-width:500px){#app{box-shadow:0 0 0 1px var(--line)}}
+.view{position:absolute;inset:0}
+.view.off{visibility:hidden;pointer-events:none}
+
+/* top bar: floats over the feed, sits solid above the reading page */
+.bar{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;pointer-events:none}
+.bar>*{pointer-events:auto}
+.seg{display:flex;padding:3px;border-radius:999px;background:var(--chip);color:var(--on-chip);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.seg button{min-height:36px;padding:0 14px;border-radius:999px;font-family:var(--label);font-weight:600;font-size:15px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.seg button[aria-selected="true"]{background:var(--on-chip);color:var(--chip-ink)}
+.bar-right{display:flex;gap:8px}
+.chip{display:grid;place-items:center;min-width:42px;height:42px;padding:0 12px;border-radius:999px;background:var(--chip);color:var(--on-chip);font-family:var(--label);font-weight:600;font-size:15px;letter-spacing:.06em;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.chip svg{width:20px;height:20px}
+.chip.icon{padding:0}
+#app[data-view="read"] .bar{background:var(--paper);pointer-events:auto}
+#app[data-view="read"] .seg,#app[data-view="read"] .chip{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);-webkit-backdrop-filter:none;backdrop-filter:none}
+#app[data-view="read"] .seg button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+
+/* feed */
+.feed{overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none;outline:none}
+.feed::-webkit-scrollbar{display:none}
+.card{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;overflow:hidden;background:var(--g);color:var(--t)}
+.seeds{position:absolute;top:0;right:0;width:100%;aspect-ratio:1;max-width:100%;color:var(--d);pointer-events:none}
+.card-body{position:relative;display:flex;flex-direction:column;gap:14px;width:100%;min-width:0;padding:74px 24px 16px}
+.verse-box{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;cursor:pointer}
+.verse{margin:0;font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.22;letter-spacing:-.004em;text-wrap:pretty;overflow-wrap:break-word}
+.ref{margin:0;display:flex;align-items:baseline;gap:10px;font-family:var(--label);font-weight:600;font-size:15.5px;letter-spacing:.09em;text-transform:uppercase}
+.ref-tr{font-weight:500;opacity:.72}
+.mark{margin-left:auto;font-family:var(--serif);font-style:italic;font-weight:600;font-size:17px;letter-spacing:0;text-transform:none;opacity:.72}
+.acts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.acts button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:60px;padding:8px 2px 7px;border-radius:14px;background:color-mix(in srgb,var(--t) 10%,transparent);font-family:var(--label);font-weight:600;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+.acts svg{width:22px;height:22px}
+.acts button[aria-pressed="true"]{background:var(--t);color:var(--g)}
+.hint{margin:0;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--label);font-weight:500;font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.hint svg{width:16px;height:16px;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(2px)}50%{transform:translateY(-3px)}}
+/* picture cards: photo, then a shade that deepens behind the words, then the words */
+.card.pic{--t:#fffdf6}
+.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;-webkit-user-select:none;user-select:none;pointer-events:none}
+.ph.in{opacity:1}
+.shade{position:absolute;inset:0;pointer-events:none}
+.card.pic .verse{text-shadow:0 1px 2px rgb(0 0 0/.5),0 0 22px rgb(0 0 0/.42)}
+.card.pic .ref,.card.pic .hint,.cap{text-shadow:0 1px 2px rgb(0 0 0/.55)}
+.card.pic .acts button{background:rgb(255 255 255/.16)}
+.card.pic .acts button[aria-pressed="true"]{background:var(--t);color:var(--g)}
+.cap{margin:-3px 0 0;font-family:var(--label);font-weight:500;font-size:12.5px;line-height:1.3;letter-spacing:.035em;opacity:.84;text-wrap:balance}
+.hint~.cap{display:none}
+/* a picture whose subject sits low carries the words at the top instead */
+.card.pic.up .verse-box{flex:0 1 auto;justify-content:flex-start}
+.card.pic.up .ref{margin-bottom:auto}
+
+/* reading page */
+.reader{display:flex;flex-direction:column;padding-top:62px;background:var(--paper)}
+.reader-head{display:flex;align-items:center;gap:10px;padding:6px 16px 10px;border-bottom:1px solid var(--line)}
+.pick{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 14px 0 16px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-family:var(--label);font-weight:700;font-size:15.5px;letter-spacing:.08em;text-transform:uppercase}
+.pick svg{width:16px;height:16px}
+.rscroll{position:relative;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 22px 130px}
+.prev{display:inline-flex;align-items:center;gap:4px;min-height:42px;margin-top:8px;color:var(--muted);font-family:var(--label);font-weight:600;font-size:14.5px;letter-spacing:.07em;text-transform:uppercase}
+.prev svg{width:16px;height:16px}
+.ch{max-width:34em;margin:0 auto}
+.ch-h{margin:26px 0 10px;font-family:var(--serif);font-weight:600;font-size:31px;line-height:1.1;text-wrap:balance}
+.sup{margin:0 0 14px;font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.4;color:var(--muted)}
+.vv{margin:0;font-family:var(--serif);font-size:19.5px;line-height:1.62}
+.v{border-radius:4px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.v sup{margin-right:.3em;font-family:var(--label);font-weight:700;font-size:.6em;line-height:0;vertical-align:.55em;color:var(--accent);font-variant-numeric:tabular-nums}
+.v.hl{background:var(--hl)}
+.v.sel{background:var(--ink);color:var(--paper)}
+.v.sel sup{color:inherit}
+.poetry .v{display:block;margin-bottom:.22em;padding-left:1.7em;text-indent:-1.7em}
+.more{max-width:34em;margin:28px auto 0;color:var(--muted);font-family:var(--label);font-weight:600;font-size:14.5px;letter-spacing:.07em;text-transform:uppercase}
+.more button{margin-left:10px;min-height:40px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font:inherit;letter-spacing:inherit;text-transform:inherit}
+.selbar{position:absolute;inset:auto 12px 14px 12px;z-index:6;display:flex;align-items:center;gap:6px;padding:7px 7px 7px 16px;border-radius:16px;background:var(--ink);color:var(--paper);box-shadow:0 8px 28px var(--shadow)}
+.sel-ref{flex:1;min-width:0;font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.07em;text-transform:uppercase}
+.selbar button{min-height:42px;padding:0 13px;border-radius:11px;font-family:var(--label);font-weight:700;font-size:14.5px;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.selbar .go{background:var(--paper);color:var(--ink)}
+.selbar .x{padding:0 10px}
+.selbar .x svg{width:20px;height:20px}
+
+/* sheets */
+.scrim{position:absolute;inset:0;z-index:8;background:var(--scrim)}
+.sheet{position:absolute;inset:auto 0 0 0;z-index:9;display:flex;flex-direction:column;max-height:88%;border-radius:22px 22px 0 0;background:var(--surface);color:var(--ink);box-shadow:0 -10px 40px var(--shadow);transform:translateY(103%);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+.sheet.open{transform:none}
+.sheet-top{display:flex;align-items:center;justify-content:flex-end;min-height:46px;padding:6px 8px 0}
+.sheet-x{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;color:var(--muted)}
+.sheet-x svg{width:22px;height:22px}
+.sheet-body{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 20px 22px}
+.eyebrow{margin:0;font-family:var(--label);font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
+.eyebrow .dim{font-weight:500;color:var(--muted)}
+.quote{margin:8px 0 0;font-family:var(--serif);font-style:italic;font-size:18.5px;line-height:1.42;text-wrap:pretty}
+.lab{margin:20px 0 4px;font-family:var(--label);font-weight:700;font-size:13.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--accent)}
+.note{margin:0;font-family:var(--serif);font-size:18px;line-height:1.5;text-wrap:pretty}
+.fine{margin:16px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.fine.tight{margin-top:6px}
+/* older commentators: a row of names, one opened at a time */
+.who{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.who button{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--label);font-weight:600;font-size:15.5px;letter-spacing:.04em;white-space:nowrap}
+.who button span{font-weight:500;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.who button[aria-expanded="true"]{background:var(--ink);color:var(--paper);box-shadow:none}
+.who button[aria-expanded="true"] span{color:inherit;opacity:.75}
+.cm{margin-top:14px;padding:16px 16px 14px;border-radius:14px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.cm-name{margin:0;font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.2}
+.cm-name span{margin-left:6px;font-family:var(--label);font-weight:500;font-size:14.5px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+.cm-about{margin:4px 0 0;font-size:14px;line-height:1.4;color:var(--muted)}
+.cm-on{margin:12px 0 0;font-family:var(--label);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.cm-text{margin-top:10px}
+.cm-text p{margin:0 0 .8em;font-family:var(--serif);font-size:17.5px;line-height:1.55;text-wrap:pretty;overflow-wrap:break-word}
+.cm-text p:last-child{margin-bottom:0}
+.cm-text .q{font-style:italic;font-weight:600}
+.cm-text .tr{padding-left:12px;border-left:2px solid var(--line);font-style:italic}
+.cm-text .gap{font-family:var(--label);font-size:13px;letter-spacing:.06em;color:var(--muted);text-align:center}
+.cm-text .trl{display:block;margin:0 0 4px;font-family:var(--label);font-style:normal;font-weight:700;font-size:12.5px;line-height:1.3;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cm-text.clamp{max-height:215px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+.cm-more{display:inline-flex;align-items:center;min-height:44px;margin-top:8px;padding:0 16px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--label);font-weight:700;font-size:14.5px;letter-spacing:.07em;text-transform:uppercase}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.btn{flex:1 1 130px;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 16px;border-radius:14px;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--label);font-weight:700;font-size:15.5px;letter-spacing:.07em;text-transform:uppercase}
+.btn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:none}
+.btn svg{width:20px;height:20px}
+.preview{display:grid;place-items:center;min-height:190px;padding:10px 0 2px}
+.preview img{display:block;max-width:100%;max-height:42vh;width:auto;height:auto;border-radius:10px;box-shadow:0 6px 24px var(--shadow);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.opts{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.seg2{display:flex;padding:3px;border-radius:13px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.seg2 button{min-height:40px;padding:0 12px;border-radius:10px;font-family:var(--label);font-weight:600;font-size:14.5px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.seg2 button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
+.sw{display:flex;gap:8px}
+.sw button{width:36px;height:36px;border-radius:50%;background:var(--g);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+.sw button[aria-checked="true"]{outline:2px solid var(--ink);outline-offset:2px}
+.bgrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;min-height:46px;margin-top:12px}
+.bgmore{display:contents}
+.mini{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line);font-family:var(--label);font-weight:700;font-size:14.5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.mini svg{width:18px;height:18px}
+.bgcap{flex:1 0 100%;min-width:0;font-size:13.5px;line-height:1.35;color:var(--muted)}
+.copybox{display:block;width:100%;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.4;resize:none}
+.bk{display:flex;flex-wrap:wrap;gap:8px}
+.bk button{min-height:42px;padding:0 13px;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:15.5px}
+.chs{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:8px;margin-top:12px}
+.chs button{min-height:48px;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-family:var(--label);font-weight:600;font-size:18px;font-variant-numeric:tabular-nums}
+.backbtn{display:inline-flex;align-items:center;gap:4px;min-height:42px;margin:0 0 4px -6px;padding:0 8px;color:var(--muted);font-family:var(--label);font-weight:600;font-size:14.5px;letter-spacing:.07em;text-transform:uppercase}
+.backbtn svg{width:16px;height:16px}
+.saved{list-style:none;margin:8px 0 0;padding:0}
+.saved li{display:flex;align-items:flex-start;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.saved .open{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.saved .r{font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.saved .x{font-family:var(--serif);font-size:17px;line-height:1.36}
+.saved .rm{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:50%;color:var(--muted)}
+.saved .rm svg{width:18px;height:18px}
+.about{margin-top:14px;border-top:1px solid var(--line)}
+.install{margin-top:18px;padding:14px 16px 16px;border-radius:14px;background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.about summary{display:flex;align-items:center;min-height:46px;font-family:var(--label);font-weight:700;font-size:14px;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;list-style:none}
+.about summary::-webkit-details-marker{display:none}
+.about summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:500;line-height:1}
+.about[open] summary::after{content:"–"}
+.credits{list-style:none;margin:0;padding:0 0 6px;font-size:14px;line-height:1.4}
+.credits li{padding:7px 0;border-top:1px solid var(--line)}
+.credits span{display:block;color:var(--muted)}
+.toast{position:absolute;left:50%;top:68px;z-index:12;max-width:calc(100% - 40px);padding:11px 18px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:15px;line-height:1.3;text-align:center;transform:translateX(-50%);opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){
+  .sheet,.toast,.ph{transition:none}
+  .hint svg{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="app" data-view="feed">
+  <header class="bar">
+    <div class="seg" role="tablist" aria-label="Reading mode">
+      <button type="button" role="tab" id="tabFeed" aria-selected="true" aria-controls="feed">For you</button>
+      <button type="button" role="tab" id="tabRead" aria-selected="false" aria-controls="reader">In order</button>
+    </div>
+    <div class="bar-right">
+      <button type="button" class="chip" id="btnTr">BSB</button>
+      <button type="button" class="chip icon" id="btnSaved" aria-label="Saved verses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5h10v15l-5-3.8-5 3.8z"/></svg></button>
+    </div>
+  </header>
+
+  <main id="feed" class="view feed" tabindex="0" aria-label="Random verse feed"></main>
+
+  <section id="reader" class="view reader off" aria-label="Read in order">
+    <div class="reader-head">
+      <button type="button" class="pick" id="pick" aria-haspopup="dialog"><span id="pickLabel">Genesis 1</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5"/></svg></button>
+    </div>
+    <div class="rscroll" id="rscroll">
+      <button type="button" class="prev" id="prevCh" hidden></button>
+      <div id="chapters"></div>
+      <p class="more" id="more"></p>
+    </div>
+  </section>
+
+  <div class="selbar" id="selbar" hidden>
+    <span class="sel-ref" id="selRef"></span>
+    <button type="button" class="go" data-sel="image">Make image</button>
+    <button type="button" data-sel="copy">Copy</button>
+    <button type="button" class="x" data-sel="clear" aria-label="Clear selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+  </div>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Details" hidden>
+    <div class="sheet-top"><button type="button" class="sheet-x" id="sheetClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var NAME='Sower';
+var STANDALONE=true;   // true in the build that runs as its own app, outside Claude
+var P=[{"b":0,"c":1,"v":1,"e":1,"t":{"bsb":"In the beginning God created the heavens and the earth.","kjv":"In the beginning God created the heaven and the earth."},"s":"The first sentence of the Bible. It opens an account of creation told in seven days.","m":"God is named as the maker before anything else is described. Sun, moon and sea were worshipped as gods across the ancient Near East; here they are things God made and set in their places."},{"b":0,"c":1,"v":27,"e":27,"t":{"bsb":"So God created man in His own image; in the image of God He created him; male and female He created them.","kjv":"So God created man in his own image, in the image of God created he him; male and female created he them."},"s":"Day six of the creation account, after the land animals.","m":"Only humans are said to be made in God’s image, and the verse says it of male and female alike. In Egypt and Mesopotamia that language was used of kings; Genesis applies it to every person."},{"b":0,"c":50,"v":20,"e":20,"t":{"bsb":"As for you, what you intended against me for evil, God intended for good, in order to accomplish a day like this—to preserve the lives of many people.","kjv":"But as for you, ye thought evil against me; but God meant it unto good, to bring to pass, as it is this day, to save much people alive."},"s":"Joseph to his brothers after their father Jacob has died. Years earlier they sold him into slavery; he now governs Egypt, and they fear revenge.","m":"Joseph does not excuse what they did. He says God worked through it to keep many people alive in the famine."},{"b":1,"c":14,"v":14,"e":14,"t":{"bsb":"The LORD will fight for you; you need only to be still.","kjv":"The LORD shall fight for you, and ye shall hold your peace."},"s":"Moses to the Israelites at the edge of the sea, with Pharaoh’s chariots closing in behind them.","m":"The people are panicking and blaming Moses for bringing them out of Egypt. He tells them the rescue will be God’s doing, and that night the sea opens."},{"b":1,"c":33,"v":14,"e":14,"t":{"bsb":"And the LORD answered, “My Presence will go with you, and I will give you rest.”","kjv":"And he said, My presence shall go with thee, and I will give thee rest."},"s":"God to Moses at Mount Sinai, after the people worshipped the golden calf. Moses has asked who will go with him as he leads them on.","m":"Moses answers that if God’s presence does not go with them, he would rather not leave at all. For him the presence matters more than the destination."},{"b":3,"c":6,"v":24,"e":26,"t":{"bsb":"May the LORD bless you and keep you; may the LORD cause His face to shine upon you and be gracious to you; may the LORD lift up His countenance toward you and give you peace.","kjv":"The LORD bless thee, and keep thee: The LORD make his face shine upon thee, and be gracious unto thee: The LORD lift up his countenance upon thee, and give thee peace."},"s":"The words God gives Moses for Aaron and his sons, the priests, to speak over Israel.","m":"Known as the priestly blessing, it is still spoken in synagogues and churches. Two small silver scrolls inscribed with a form of it, found at Ketef Hinnom in Jerusalem, are the oldest known inscriptions of a biblical text."},{"b":4,"c":6,"v":4,"e":5,"t":{"bsb":"Hear, O Israel: The LORD our God, the LORD is One. And you shall love the LORD your God with all your heart and with all your soul and with all your strength.","kjv":"Hear, O Israel: The LORD our God is one LORD: And thou shalt love the LORD thy God with all thine heart, and with all thy soul, and with all thy might."},"s":"Moses to Israel on the plains of Moab, shortly before they cross into the land.","m":"Called the Shema, from its first Hebrew word, “hear.” Observant Jews recite it morning and evening, and Jesus named verse 5 the greatest commandment."},{"b":4,"c":31,"v":6,"e":6,"t":{"bsb":"Be strong and courageous; do not be afraid or terrified of them, for it is the LORD your God who goes with you; He will never leave you nor forsake you.","kjv":"Be strong and of a good courage, fear not, nor be afraid of them: for the LORD thy God, he it is that doth go with thee; he will not fail thee, nor forsake thee."},"s":"Moses, aged 120, handing leadership to Joshua. He will not cross the Jordan with the people.","m":"The encouragement is spoken to all Israel as they face nations stronger than themselves. Hebrews 13:5 later quotes the promise that God will never leave or forsake his people."},{"b":5,"c":1,"v":9,"e":9,"t":{"bsb":"Have I not commanded you to be strong and courageous? Do not be afraid; do not be discouraged, for the LORD your God is with you wherever you go.","kjv":"Have not I commanded thee? Be strong and of a good courage; be not afraid, neither be thou dismayed: for the LORD thy God is with thee whithersoever thou goest."},"s":"God to Joshua just after Moses’ death, as Joshua takes command and prepares to cross the Jordan.","m":"The command to be strong and courageous comes three times in this short speech. The reason given here is God’s presence wherever Joshua goes; his own ability is never mentioned."},{"b":5,"c":24,"v":15,"e":15,"t":{"bsb":"But if it is unpleasing in your sight to serve the LORD, then choose for yourselves this day whom you will serve, whether the gods your fathers served beyond the Euphrates, or the gods of the Amorites in whose land you are living. As for me and my house, we will serve the LORD!","kjv":"And if it seem evil unto you to serve the LORD, choose you this day whom ye will serve; whether the gods which your fathers served that were on the other side of the flood, or the gods of the Amorites, in whose land ye dwell: but as for me and my house, we will serve the LORD."},"s":"Joshua, near the end of his life, to the tribes of Israel gathered at Shechem.","m":"He has just retold their history from Abraham to the conquest. Then he sets out the choice: the gods their ancestors served, the gods of the land they now live in, or the LORD."},{"b":7,"c":1,"v":16,"e":16,"t":{"bsb":"But Ruth replied: “Do not urge me to leave you or to turn from following you. For wherever you go, I will go, and wherever you live, I will live; your people will be my people, and your God will be my God.”","kjv":"And Ruth said, Intreat me not to leave thee, or to return from following after thee: for whither thou goest, I will go; and where thou lodgest, I will lodge: thy people shall be my people, and thy God my God…"},"s":"Ruth, a young widow from Moab, to her mother-in-law Naomi on the road back to Bethlehem. Naomi has urged her to turn back.","m":"Often read at weddings, the words were first spoken by one widow to another. Ruth leaves her country and its gods for Naomi’s, and she becomes the great-grandmother of King David."},{"b":8,"c":16,"v":7,"e":7,"t":{"bsb":"But the LORD said to Samuel, “Do not consider his appearance or height, for I have rejected him; the LORD does not see as man does. For man sees the outward appearance, but the LORD sees the heart.”","kjv":"But the LORD said unto Samuel, Look not on his countenance, or on the height of his stature; because I have refused him: for the LORD seeth not as man seeth; for man looketh on the outward appearance, but the LORD looketh on the heart."},"s":"God to the prophet Samuel in Bethlehem, where he has been sent to anoint one of Jesse’s sons as king.","m":"Samuel assumes the impressive eldest son, Eliab, must be the one. Seven brothers are passed over before David, the youngest, is called in from tending the sheep."},{"b":8,"c":17,"v":47,"e":47,"t":{"bsb":"And all those assembled here will know that it is not by sword or spear that the LORD saves; for the battle is the LORD’s, and He will give all of you into our hands.","kjv":"And all this assembly shall know that the LORD saveth not with sword and spear: for the battle is the LORD’s, and he will give you into our hands."},"s":"David, still a youth, to the Philistine champion Goliath in the Valley of Elah.","m":"He has turned down King Saul’s armour and carries a sling and five stones. His speech says the outcome will show both armies that victory does not depend on weapons."},{"b":13,"c":7,"v":14,"e":14,"t":{"bsb":"…and if My people who are called by My name humble themselves and pray and seek My face and turn from their wicked ways, then I will hear from heaven, forgive their sin, and heal their land.","kjv":"If my people, which are called by my name, shall humble themselves, and pray, and seek my face, and turn from their wicked ways; then will I hear from heaven, and will forgive their sin, and will heal their land."},"s":"God to King Solomon at night, after the dedication of the temple in Jerusalem.","m":"It answers Solomon’s prayer in the previous chapter, which asked God to hear when Israel turned back after drought, locusts or plague. “My people” here is Israel, and the land is theirs."},{"b":15,"c":8,"v":10,"e":10,"t":{"bsb":"Then Nehemiah told them, “Go and eat what is rich, drink what is sweet, and send out portions to those who have nothing prepared, since today is holy to our Lord. Do not grieve, for the joy of the LORD is your strength.”","kjv":"Then he said unto them, Go your way, eat the fat, and drink the sweet, and send portions unto them for whom nothing is prepared: for this day is holy unto our Lord: neither be ye sorry; for the joy of the LORD is your strength."},"s":"The crowd in Jerusalem is weeping as Ezra reads the Law aloud. The Hebrew says only “he said”; the Berean translation names the speaker as Nehemiah, the governor.","m":"The leaders tell them to stop mourning because the day is holy. They are sent home to feast and to share food with anyone who has none."},{"b":16,"c":4,"v":14,"e":14,"t":{"bsb":"For if you remain silent at this time, relief and deliverance for the Jews will arise from another place, but you and your father’s house will perish. And who knows if perhaps you have come to the kingdom for such a time as this?","kjv":"For if thou altogether holdest thy peace at this time, then shall there enlargement and deliverance arise to the Jews from another place; but thou and thy father’s house shall be destroyed: and who knoweth whether thou art come to the kingdom for such a time as this?"},"s":"Mordecai’s message to his cousin Queen Esther, after a royal decree orders the killing of the Jews across the Persian empire.","m":"Going to the king uninvited could cost Esther her life. The book of Esther never mentions God by name, and this verse is the closest it comes to pointing at providence."},{"b":17,"c":19,"v":25,"e":25,"t":{"bsb":"But I know that my Redeemer lives, and in the end He will stand upon the earth.","kjv":"For I know that my redeemer liveth, and that he shall stand at the latter day upon the earth…"},"s":"Job, answering his friend Bildad. He has lost his children, his wealth and his health, and his friends insist he must have sinned.","m":"In the middle of his complaint Job declares that someone will take up his cause. “Redeemer” translates the Hebrew go’el, the relative whose duty was to defend a family member’s rights."},{"b":18,"c":1,"v":1,"e":2,"t":{"bsb":"Blessed is the man who does not walk in the counsel of the wicked, or set foot on the path of sinners, or sit in the seat of mockers. But his delight is in the Law of the LORD, and on His law he meditates day and night.","kjv":"Blessed is the man that walketh not in the counsel of the ungodly, nor standeth in the way of sinners, nor sitteth in the seat of the scornful. But his delight is in the law of the LORD; and in his law doth he meditate day and night."},"s":"The opening of the book of Psalms. It has no title and no named author.","m":"It stands as a doorway to the whole collection, contrasting two ways to live. Verse 1 traces a slow settling in: walking alongside, standing on the path, then taking a seat."},{"b":18,"c":16,"v":11,"e":11,"t":{"bsb":"You have made known to me the path of life; You will fill me with joy in Your presence, with eternal pleasures at Your right hand.","kjv":"Thou wilt shew me the path of life: in thy presence is fulness of joy; at thy right hand there are pleasures for evermore."},"s":"A psalm of David, a prayer of trust in God as his refuge.","m":"Peter quotes this psalm at Pentecost in Acts 2. He argues that David’s words about not being abandoned to the grave look ahead to the resurrection of Jesus."},{"b":18,"c":19,"v":1,"e":1,"t":{"bsb":"The heavens declare the glory of God; the skies proclaim the work of His hands.","kjv":"The heavens declare the glory of God; and the firmament sheweth his handywork."},"s":"A psalm of David.","m":"The first half says the sky declares God’s glory day and night; the second half turns to the written law. C. S. Lewis ranked it the finest poem in the Psalms."},{"b":18,"c":23,"v":4,"e":4,"t":{"bsb":"Even though I walk through the valley of the shadow of death, I will fear no evil, for You are with me; Your rod and Your staff, they comfort me.","kjv":"Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me."},"s":"A psalm of David, who was a shepherd before he was king.","m":"Up to this verse David speaks about God as “he.” In the dark valley he turns and addresses God directly. The rod was the shepherd’s club against predators, and the staff guided the sheep."},{"b":18,"c":27,"v":1,"e":1,"t":{"bsb":"The LORD is my light and my salvation—whom shall I fear? The LORD is the stronghold of my life—whom shall I dread?","kjv":"The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?"},"s":"A psalm of David, written with enemies in view. Later verses mention armies and false witnesses.","m":"The confidence comes first, and the plea for help only arrives in verse 7. Light, salvation and stronghold (“strength” in the King James Version) are three pictures of the same protection."},{"b":18,"c":30,"v":5,"e":5,"t":{"bsb":"For His anger is fleeting, but His favor lasts a lifetime. Weeping may stay the night, but joy comes in the morning.","kjv":"For his anger endureth but a moment; in his favour is life: weeping may endure for a night, but joy cometh in the morning."},"s":"A psalm of David. Its title links it to the dedication of “the house,” which most modern translations take to be the temple.","m":"David looks back on a time he came close to death and was restored. The verse sets a moment of anger against God’s favor, and a night of weeping against a morning of joy."},{"b":18,"c":34,"v":18,"e":18,"t":{"bsb":"The LORD is near to the brokenhearted; He saves the contrite in spirit.","kjv":"The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit."},"s":"The title ties this psalm to the time David pretended to be insane to escape a Philistine king.","m":"The promise is God’s nearness to people who are already crushed. The next verse admits that the righteous have many troubles."},{"b":18,"c":37,"v":4,"e":4,"t":{"bsb":"Delight yourself in the LORD, and He will give you the desires of your heart.","kjv":"Delight thyself also in the LORD; and he shall give thee the desires of thine heart."},"s":"A wisdom psalm of David, written in old age for people troubled that the wicked seem to prosper.","m":"It opens by telling the reader not to fret over evildoers. This line assumes a person whose joy is already in God, which shapes what that heart wants."},{"b":18,"c":46,"v":1,"e":1,"t":{"bsb":"God is our refuge and strength, an ever-present help in times of trouble.","kjv":"God is our refuge and strength, a very present help in trouble."},"s":"A song of the sons of Korah, a guild of temple musicians.","m":"The psalm pictures mountains falling into the sea and nations in uproar, and says God’s city will not be moved. It inspired Martin Luther’s hymn “A Mighty Fortress Is Our God.”"},{"b":18,"c":46,"v":10,"e":10,"t":{"bsb":"Be still and know that I am God; I will be exalted among the nations, I will be exalted over the earth.","kjv":"Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth."},"s":"Near the end of Psalm 46, a song of the sons of Korah, where God himself speaks.","m":"In context this is most likely a command to warring nations. The verse before says God breaks the bow and shatters the spear, so “be still” is closer to “stop fighting” than to an invitation to quiet."},{"b":18,"c":51,"v":10,"e":10,"t":{"bsb":"Create in me a clean heart, O God, and renew a right spirit within me.","kjv":"Create in me a clean heart, O God; and renew a right spirit within me."},"s":"David’s prayer of confession after the prophet Nathan confronted him over Bathsheba and the death of her husband Uriah.","m":"“Create” is the verb used in Genesis 1:1, one the Old Testament uses only with God as its subject. David is asking for something he cannot produce himself."},{"b":18,"c":56,"v":3,"e":3,"t":{"bsb":"When I am afraid, I put my trust in You.","kjv":"What time I am afraid, I will trust in thee."},"s":"The title places this psalm when the Philistines seized David in Gath.","m":"David does not claim to be unafraid. He names the fear, says where he will put his trust, and in the very next verse says he will not be afraid."},{"b":18,"c":90,"v":12,"e":12,"t":{"bsb":"So teach us to number our days, that we may present a heart of wisdom.","kjv":"So teach us to number our days, that we may apply our hearts unto wisdom."},"s":"The only psalm attributed to Moses.","m":"It sets God’s eternity against the shortness of human life, seventy years, or eighty for the strong. Counting our days is the lesson Moses asks God to teach."},{"b":18,"c":103,"v":11,"e":12,"t":{"bsb":"For as high as the heavens are above the earth, so great is His loving devotion for those who fear Him. As far as the east is from the west, so far has He removed our transgressions from us.","kjv":"For as the heaven is high above the earth, so great is his mercy toward them that fear him. As far as the east is from the west, so far hath he removed our transgressions from us."},"s":"A psalm of David, a hymn that lists what God has done for him.","m":"Two measurements describe forgiveness: the height of the sky and the distance from east to west. The reason follows shortly after: God knows how we are formed and remembers that we are dust."},{"b":18,"c":118,"v":24,"e":24,"t":{"bsb":"This is the day that the LORD has made; we will rejoice and be glad in it.","kjv":"This is the day which the LORD hath made; we will rejoice and be glad in it."},"s":"The last of the Hallel psalms (113–118), sung at Passover.","m":"“The day” follows from verse 22, where the stone the builders rejected becomes the cornerstone. The crowd is celebrating a rescue God has just carried out."},{"b":18,"c":119,"v":105,"e":105,"t":{"bsb":"Your word is a lamp to my feet and a light to my path.","kjv":"Thy word is a lamp unto my feet, and a light unto my path."},"s":"From the longest chapter in the Bible, 176 verses arranged by the 22 letters of the Hebrew alphabet.","m":"Nearly every verse uses a word for Scripture: law, statutes, precepts, word. The lamp in view is a small oil lamp, enough light for the next few steps."},{"b":18,"c":121,"v":1,"e":2,"t":{"bsb":"I lift up my eyes to the hills. From where does my help come? My help comes from the LORD, the Maker of heaven and earth.","kjv":"I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth."},"s":"A Song of Ascents (“degrees” in the King James Version), one of fifteen psalms (120–134) traditionally sung by pilgrims on the way up to Jerusalem.","m":"The hills may be the dangerous road ahead or the heights where Jerusalem stands. Either way verse 2 settles it: help comes from the one who made them."},{"b":18,"c":139,"v":13,"e":14,"t":{"bsb":"For You formed my inmost being; You knit me together in my mother’s womb. I praise You, for I am fearfully and wonderfully made. Marvelous are Your works, and I know this very well.","kjv":"For thou hast possessed my reins: thou hast covered me in my mother’s womb. I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well."},"s":"A psalm of David about being completely known by God.","m":"Earlier verses say there is nowhere David could go to escape God’s presence. Here he traces that knowledge back to before his birth, and his response is praise."},{"b":19,"c":3,"v":5,"e":6,"t":{"bsb":"Trust in the LORD with all your heart, and lean not on your own understanding; in all your ways acknowledge Him, and He will make your paths straight.","kjv":"Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths."},"s":"A father’s instruction to his son, from the opening section of Proverbs, a book attributed mainly to Solomon.","m":"“Heart” in Hebrew covers thinking and deciding as well as feeling. In Hebrew the picture in verse 6 is of a road made straight and level for travel."},{"b":19,"c":4,"v":23,"e":23,"t":{"bsb":"Guard your heart with all diligence, for from it flow springs of life.","kjv":"Keep thy heart with all diligence; for out of it are the issues of life."},"s":"A father urging his son to hold on to wisdom.","m":"In Hebrew thought the heart is the control centre, where mind, will and feeling meet. The next verses work outward from it to the mouth, the eyes and the feet."},{"b":19,"c":15,"v":1,"e":1,"t":{"bsb":"A gentle answer turns away wrath, but a harsh word stirs up anger.","kjv":"A soft answer turneth away wrath: but grievous words stir up anger."},"s":"One of the two-line sayings that fill Proverbs 10–22, headed “the proverbs of Solomon.”","m":"The two lines set one kind of speech against another. Proverbs keeps returning to the tongue; three verses later a soothing tongue is called a tree of life."},{"b":19,"c":16,"v":9,"e":9,"t":{"bsb":"A man’s heart plans his course, but the LORD determines his steps.","kjv":"A man’s heart deviseth his way: but the LORD directeth his steps."},"s":"From the central collection of Solomon’s sayings. Chapter 16 gathers several about God’s rule over human plans.","m":"Planning is taken for granted, and nothing here discourages it. The saying is about who has the final word over where the steps land."},{"b":19,"c":17,"v":17,"e":17,"t":{"bsb":"A friend loves at all times, and a brother is born for adversity.","kjv":"A friend loveth at all times, and a brother is born for adversity."},"s":"A saying from Solomon’s collection, in a chapter with several lines on friends and family quarrels.","m":"The two lines build on each other: a friend’s love is constant, and hard times show what a brother is for. Proverbs 18:24 adds that some friends stay closer than a brother."},{"b":19,"c":22,"v":6,"e":6,"t":{"bsb":"Train up a child in the way he should go, and when he is old he will not depart from it.","kjv":"Train up a child in the way he should go: and when he is old, he will not depart from it."},"s":"A saying from the collection attributed to Solomon.","m":"Proverbs describe how life usually goes; they are not guarantees. The Hebrew reads literally “according to his way,” which some take as the right path and others as the child’s own bent."},{"b":19,"c":27,"v":17,"e":17,"t":{"bsb":"As iron sharpens iron, so one man sharpens another.","kjv":"Iron sharpeneth iron; so a man sharpeneth the countenance of his friend."},"s":"From the sayings of Solomon copied out by the men of King Hezekiah (Proverbs 25–29).","m":"Sharpening iron takes friction and throws sparks. The proverb treats honest challenge between friends as the thing that makes each of them more useful."},{"b":20,"c":3,"v":1,"e":1,"t":{"bsb":"To everything there is a season, and a time for every purpose under heaven…","kjv":"To every thing there is a season, and a time to every purpose under the heaven…"},"s":"The Teacher (“the Preacher” in the King James Version), introduced as a son of David and king in Jerusalem, reflecting on life “under the sun.”","m":"This line introduces a poem of fourteen pairs, among them birth and death, planting and uprooting, war and peace. His conclusion in verse 11 is that God has made everything beautiful in its time and set eternity in the human heart (the King James Version has “the world”)."},{"b":20,"c":4,"v":9,"e":10,"t":{"bsb":"Two are better than one, because they have a good return for their labor. For if one falls down, his companion can lift him up; but pity the one who falls without another to help him up!","kjv":"Two are better than one; because they have a good reward for their labour. For if they fall, the one will lift up his fellow: but woe to him that is alone when he falleth; for he hath not another to help him up."},"s":"The Teacher (“the Preacher” in the King James Version), after describing a man who works without end and has no one to share it with.","m":"The argument is practical. Partners earn more, lift each other up, keep each other warm and can defend themselves, and it ends with the cord of three strands that is not quickly broken."},{"b":20,"c":12,"v":13,"e":13,"t":{"bsb":"When all has been heard, the conclusion of the matter is this: Fear God and keep His commandments, because this is the whole duty of man.","kjv":"Let us hear the conclusion of the whole matter: Fear God, and keep his commandments: for this is the whole duty of man."},"s":"The next-to-last verse of Ecclesiastes.","m":"For twelve chapters the Teacher (“the Preacher” in the King James Version) has tested wealth, pleasure, work and wisdom and found each one empty. The book then gives its verdict in a single sentence."},{"b":21,"c":8,"v":7,"e":7,"t":{"bsb":"Mighty waters cannot quench love; rivers cannot sweep it away. If a man were to give all the wealth of his house for love, his offer would be utterly scorned.","kjv":"Many waters cannot quench love, neither can the floods drown it: if a man would give all the substance of his house for love, it would utterly be contemned."},"s":"Near the end of the Song of Solomon, a cycle of love poems sung between a bride and her beloved.","m":"The verse before calls love as strong as death. Here it is also beyond price: a man who tried to buy it with everything he owned would be laughed at."},{"b":22,"c":6,"v":8,"e":8,"t":{"bsb":"Then I heard the voice of the Lord saying: “Whom shall I send? Who will go for Us?” And I said: “Here am I. Send me!”","kjv":"Also I heard the voice of the Lord, saying, Whom shall I send, and who will go for us? Then said I, Here am I; send me."},"s":"Isaiah’s vision of God enthroned in the temple, “in the year that King Uzziah died.”","m":"Moments earlier Isaiah cried out that he was ruined, a man of unclean lips, and a seraph touched his mouth with a burning coal. He volunteers only after he has been cleansed."},{"b":22,"c":9,"v":6,"e":6,"t":{"bsb":"For unto us a child is born, unto us a son is given, and the government will be upon His shoulders. And He will be called Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace.","kjv":"For unto us a child is born, unto us a son is given: and the government shall be upon his shoulder: and his name shall be called Wonderful, Counsellor, The mighty God, The everlasting Father, The Prince of Peace."},"s":"Isaiah to the kingdom of Judah under the threat of Assyria, promising light for a people walking in darkness.","m":"The child is given a string of royal titles, four pairs in most modern translations and five names in the King James Version, which separates “Wonderful” from “Counsellor.” Matthew quotes the opening of this passage when Jesus begins preaching in Galilee, and Handel set this verse in his oratorio Messiah."},{"b":22,"c":26,"v":3,"e":3,"t":{"bsb":"You will keep in perfect peace the steadfast of mind, because he trusts in You.","kjv":"Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee."},"s":"A song that Isaiah says will be sung in Judah on the day God rescues his people.","m":"“Perfect peace” is the Hebrew word shalom said twice. The next verse gives the ground for the trust: in the LORD is everlasting strength, literally an everlasting rock."},{"b":22,"c":40,"v":8,"e":8,"t":{"bsb":"The grass withers and the flowers fall, but the word of our God stands forever.","kjv":"The grass withereth, the flower fadeth: but the word of our God shall stand for ever."},"s":"The start of Isaiah’s message of comfort, addressed to a people in exile in Babylon.","m":"A voice says all humanity is like grass that withers when God’s breath blows on it. Against that the prophet sets the one thing that lasts. Peter quotes these lines in 1 Peter 1:24–25."},{"b":22,"c":40,"v":31,"e":31,"t":{"bsb":"But those who wait upon the LORD will renew their strength; they will mount up with wings like eagles; they will run and not grow weary, they will walk and not faint.","kjv":"But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles; they shall run, and not be weary; and they shall walk, and not faint."},"s":"The close of Isaiah 40, answering exiles who say God has lost sight of them.","m":"The verse before says even young men grow tired and fall. The order may surprise: soaring first, then running, and last of all walking without giving up."},{"b":22,"c":41,"v":10,"e":10,"t":{"bsb":"Do not fear, for I am with you; do not be afraid, for I am your God. I will strengthen you; I will surely help you; I will uphold you with My right hand of righteousness.","kjv":"Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness."},"s":"God speaking to Israel, whom he calls “my servant” and “descendant of Abraham my friend,” while the nations tremble at a rising conqueror.","m":"The command not to fear rests on two statements: I am with you, I am your God. Three promises follow, to strengthen, to help and to uphold."},{"b":22,"c":43,"v":2,"e":2,"t":{"bsb":"When you pass through the waters, I will be with you; and when you go through the rivers, they will not overwhelm you. When you walk through the fire, you will not be scorched; the flames will not set you ablaze.","kjv":"When thou passest through the waters, I will be with thee; and through the rivers, they shall not overflow thee: when thou walkest through the fire, thou shalt not be burned; neither shall the flame kindle upon thee."},"s":"God to exiled Israel, just after telling them he has called them by name and they are his.","m":"The verse says “when,” so the water and the fire are assumed. The images recall the crossing of the sea and the Jordan in Israel’s own history."},{"b":22,"c":53,"v":5,"e":5,"t":{"bsb":"But He was pierced for our transgressions, He was crushed for our iniquities; the punishment that brought us peace was upon Him, and by His stripes we are healed.","kjv":"But he was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed."},"s":"The fourth of Isaiah’s Servant Songs, about a servant who suffers for the wrongs of others.","m":"The New Testament reads this chapter as a description of the death of Jesus. Philip explains it that way to an Ethiopian official in Acts 8, and Peter quotes it in 1 Peter 2:24."},{"b":22,"c":55,"v":8,"e":9,"t":{"bsb":"“For My thoughts are not your thoughts, neither are your ways My ways,” declares the LORD. “For as the heavens are higher than the earth, so My ways are higher than your ways and My thoughts than your thoughts.”","kjv":"For my thoughts are not your thoughts, neither are your ways my ways, saith the LORD. For as the heavens are higher than the earth, so are my ways higher than your ways, and my thoughts than your thoughts."},"s":"An invitation, late in Isaiah, to come back to God and be freely pardoned.","m":"The verse before promises that God will abundantly forgive anyone who returns. Read with that verse, the higher thought is mercy on a scale people would not offer."},{"b":23,"c":17,"v":7,"e":8,"t":{"bsb":"But blessed is the man who trusts in the LORD, whose confidence is in Him. He is like a tree planted by the waters that sends out its roots toward the stream. It does not fear when the heat comes, and its leaves are always green. It does not worry in a year of drought, nor does it cease to produce fruit.","kjv":"Blessed is the man that trusteth in the LORD, and whose hope the LORD is. For he shall be as a tree planted by the waters, and that spreadeth out her roots by the river, and shall not see when heat cometh, but her leaf shall be green; and shall not be careful in the year of drought, neither shall cease from yielding fruit."},"s":"Jeremiah to Judah in its last decades, contrasting two kinds of people.","m":"Just before this, the person who trusts in human strength is a shrub in the desert. The tree by the stream still faces heat and drought, and its roots make the difference. The same image opens Psalm 1."},{"b":23,"c":29,"v":11,"e":11,"t":{"bsb":"For I know the plans I have for you, declares the LORD, plans to prosper you and not to harm you, to give you a future and a hope.","kjv":"For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end."},"s":"From a letter Jeremiah sent to the Jews deported to Babylon.","m":"The verse before says the rescue will come after seventy years, so most who first heard it would not live to see it. Meanwhile they are told to build houses, plant gardens and seek the good of the city. The Hebrew word is shalom, peace or wellbeing: “peace” in the King James Version, “prosper” in the Berean Standard Bible."},{"b":24,"c":3,"v":22,"e":23,"t":{"bsb":"Because of the loving devotion of the LORD we are not consumed, for His mercies never fail. They are new every morning; great is Your faithfulness!","kjv":"It is of the LORD’s mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness."},"s":"A poem of grief over Jerusalem, destroyed by the Babylonians in 586 BC.","m":"These lines stand near the centre of the book, surrounded by scenes of siege and starvation. The hymn “Great Is Thy Faithfulness” takes its title from verse 23."},{"b":25,"c":36,"v":26,"e":26,"t":{"bsb":"I will give you a new heart and put a new spirit within you; I will remove your heart of stone and give you a heart of flesh.","kjv":"A new heart also will I give you, and a new spirit will I put within you: and I will take away the stony heart out of your flesh, and I will give you an heart of flesh."},"s":"God, through Ezekiel, to the exiles in Babylon, promising to bring them home.","m":"The promise goes further than a return to the land. God says he will change the people from within, and verse 22 says he acts for the sake of his own name."},{"b":26,"c":3,"v":17,"e":18,"t":{"bsb":"If the God whom we serve exists, then He is able to deliver us from the blazing fiery furnace and from your hand, O king. But even if He does not, let it be known to you, O king, that we will not serve your gods or worship the golden statue you have set up.","kjv":"If it be so, our God whom we serve is able to deliver us from the burning fiery furnace, and he will deliver us out of thine hand, O king. But if not, be it known unto thee, O king, that we will not serve thy gods, nor worship the golden image which thou hast set up."},"s":"Shadrach, Meshach and Abednego to King Nebuchadnezzar, who has ordered them to bow to his gold statue or be thrown into a furnace.","m":"They say God is able to rescue them, and that even if he does not they will not bow. The two translations word verse 17 differently because the Aramaic is difficult."},{"b":27,"c":6,"v":6,"e":6,"t":{"bsb":"For I desire mercy, not sacrifice, and the knowledge of God rather than burnt offerings.","kjv":"For I desired mercy, and not sacrifice; and the knowledge of God more than burnt offerings."},"s":"God, through the prophet Hosea, to the northern kingdom of Israel in its final decades.","m":"The people kept up their sacrifices while their loyalty vanished like morning mist. Jesus quotes this verse twice in Matthew, both times answering Pharisees who objected to what he and his disciples were doing."},{"b":28,"c":2,"v":13,"e":13,"t":{"bsb":"So rend your hearts and not your garments, and return to the LORD your God. For He is gracious and compassionate, slow to anger, abounding in loving devotion. And He relents from sending disaster.","kjv":"And rend your heart, and not your garments, and turn unto the LORD your God: for he is gracious and merciful, slow to anger, and of great kindness, and repenteth him of the evil."},"s":"Joel to Judah after a devastating plague of locusts.","m":"Tearing one’s clothes was the outward sign of grief. Joel asks for the inward reality and quotes God’s own description of himself from Exodus 34: gracious, compassionate, slow to anger."},{"b":29,"c":5,"v":24,"e":24,"t":{"bsb":"But let justice roll on like a river, and righteousness like an ever-flowing stream.","kjv":"But let judgment run down as waters, and righteousness as a mighty stream."},"s":"Amos, a herdsman from Judah, preaching to the prosperous northern kingdom of Israel.","m":"Just before this God says he hates their festivals and will not listen to their songs, because the poor are being cheated in court. Martin Luther King Jr. quoted this line in his “I Have a Dream” speech."},{"b":32,"c":6,"v":8,"e":8,"t":{"bsb":"He has shown you, O man, what is good. And what does the LORD require of you but to act justly, to love mercy, and to walk humbly with your God?","kjv":"He hath shewed thee, O man, what is good; and what doth the LORD require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?"},"s":"Micah, a prophet from the Judean countryside, in a scene set up as a lawsuit between God and his people.","m":"The people ask what offering would satisfy God: calves, thousands of rams, even a firstborn child. The answer is three plain things they have already been told."},{"b":33,"c":1,"v":7,"e":7,"t":{"bsb":"The LORD is good, a stronghold in the day of distress; He cares for those who trust in Him.","kjv":"The LORD is good, a strong hold in the day of trouble; and he knoweth them that trust in him."},"s":"Nahum’s prophecy against Nineveh, capital of the Assyrian empire that had terrorised Israel and Judah.","m":"This gentle line sits inside a fierce description of God’s power over storm, sea and mountain. For Assyria’s victims, judgment on Nineveh and refuge for the trusting were the same news."},{"b":34,"c":3,"v":17,"e":18,"t":{"bsb":"Though the fig tree does not bud and no fruit is on the vines, though the olive crop fails and the fields produce no food, though the sheep are cut off from the fold and no cattle are in the stalls, yet I will exult in the LORD; I will rejoice in the God of my salvation!","kjv":"Although the fig tree shall not blossom, neither shall fruit be in the vines; the labour of the olive shall fail, and the fields shall yield no meat; the flock shall be cut off from the fold, and there shall be no herd in the stalls: Yet I will rejoice in the LORD, I will joy in the God of my salvation."},"s":"The end of Habakkuk’s prayer. He has been told that Babylon is coming to invade Judah.","m":"For a farming people the list describes total ruin: no fruit, no grain, no flocks. Habakkuk opened the book asking God “How long?” and closes it rejoicing before anything has changed."},{"b":35,"c":3,"v":17,"e":17,"t":{"bsb":"The LORD your God is among you; He is mighty to save. He will rejoice over you with gladness; He will quiet you with His love; He will rejoice over you with singing.","kjv":"The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing."},"s":"The close of Zephaniah, after chapters of warning to Jerusalem in the reign of King Josiah.","m":"A book that opens with judgment ends with God singing. The picture is of a warrior who has won and now rejoices over the people he saved."},{"b":37,"c":4,"v":6,"e":6,"t":{"bsb":"So he said to me, “This is the word of the LORD to Zerubbabel: Not by might nor by power, but by My Spirit, says the LORD of Hosts.”","kjv":"Then he answered and spake unto me, saying, This is the word of the LORD unto Zerubbabel, saying, Not by might, nor by power, but by my spirit, saith the LORD of hosts."},"s":"A message for Zerubbabel, governor of Judah, who is rebuilding the temple after the return from Babylon.","m":"The work had stalled for years, and the returned community was small and poor. The next verse promises that the mountain in his way will become level ground and that he will set the final stone."},{"b":39,"c":5,"v":16,"e":16,"t":{"bsb":"In the same way, let your light shine before men, that they may see your good deeds and glorify your Father in heaven.","kjv":"Let your light so shine before men, that they may see your good works, and glorify your Father which is in heaven."},"s":"Jesus in the Sermon on the Mount, speaking to his disciples on a hillside in Galilee.","m":"He has just called them the light of the world, a city on a hill, a lamp on a stand. The aim of being seen is that God gets the credit, and in the next chapter he warns against doing good in order to be admired."},{"b":39,"c":5,"v":44,"e":45,"t":{"bsb":"But I tell you, love your enemies and pray for those who persecute you, that you may be sons of your Father in heaven. He causes His sun to rise on the evil and the good, and sends rain on the righteous and the unrighteous.","kjv":"But I say unto you, Love your enemies, bless them that curse you, do good to them that hate you, and pray for them which despitefully use you, and persecute you; That ye may be the children of your Father which is in heaven: for he maketh his sun to rise on the evil and on the good, and sendeth rain on the just and on the unjust."},"s":"Jesus in the Sermon on the Mount, in a series of sayings that begin “You have heard that it was said.”","m":"His hearers lived under Roman rule, so “enemies” was no abstraction. The reason he gives is the Father’s own practice of sending sun and rain on good and bad alike."},{"b":39,"c":6,"v":33,"e":33,"t":{"bsb":"But seek first the kingdom of God and His righteousness, and all these things will be added unto you.","kjv":"But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you."},"s":"Jesus in the Sermon on the Mount, speaking to people anxious about food and clothing.","m":"“These things” are the basics he has just listed: what to eat, drink and wear. He points to the birds and the wildflowers as evidence that God knows what they need."},{"b":39,"c":6,"v":34,"e":34,"t":{"bsb":"Therefore do not worry about tomorrow, for tomorrow will worry about itself. Today has enough trouble of its own.","kjv":"Take therefore no thought for the morrow: for the morrow shall take thought for the things of itself. Sufficient unto the day is the evil thereof."},"s":"The last line of Jesus’ teaching on worry in the Sermon on the Mount.","m":"It follows the instruction to seek God’s kingdom first. Jesus is realistic here. He assumes each day will bring trouble and tells his hearers to carry one day’s worth at a time."},{"b":39,"c":7,"v":7,"e":7,"t":{"bsb":"Ask, and it will be given to you; seek, and you will find; knock, and the door will be opened to you.","kjv":"Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you…"},"s":"Jesus near the end of the Sermon on the Mount.","m":"The three verbs are in a form that can mean keep asking, keep seeking, keep knocking. He follows with a comparison: if flawed parents give their children bread and fish, how much more will the Father give good things."},{"b":39,"c":11,"v":28,"e":30,"t":{"bsb":"Come to Me, all you who are weary and burdened, and I will give you rest. Take My yoke upon you and learn from Me; for I am gentle and humble in heart, and you will find rest for your souls. For My yoke is easy and My burden is light.","kjv":"Come unto me, all ye that labour and are heavy laden, and I will give you rest. Take my yoke upon you, and learn of me; for I am meek and lowly in heart: and ye shall find rest unto your souls. For my yoke is easy, and my burden is light."},"s":"Jesus in Galilee, shortly after rebuking towns that saw his miracles and refused to change.","m":"A yoke is the wooden frame that joins two oxen so they pull together. Rabbis spoke of taking on the yoke of the Law; Jesus offers his own and calls it easy."},{"b":39,"c":16,"v":26,"e":26,"t":{"bsb":"What will it profit a man if he gains the whole world, yet forfeits his soul? Or what can a man give in exchange for his soul?","kjv":"For what is a man profited, if he shall gain the whole world, and lose his own soul? or what shall a man give in exchange for his soul?"},"s":"Jesus to his disciples near Caesarea Philippi, just after telling them for the first time that he must suffer and die.","m":"Peter has rebuked him for saying so. Jesus answers with the call to take up the cross, then puts the question in the language of profit and loss."},{"b":39,"c":18,"v":20,"e":20,"t":{"bsb":"For where two or three gather together in My name, there am I with them.","kjv":"For where two or three are gathered together in my name, there am I in the midst of them."},"s":"Jesus to his disciples, in instructions on what to do when a fellow believer sins against you.","m":"The “two or three” echo the witnesses required in that process, gathered to pray over a hard decision. The promise is his presence with them as they act."},{"b":39,"c":22,"v":37,"e":39,"t":{"bsb":"Jesus declared, “‘Love the Lord your God with all your heart and with all your soul and with all your mind.’ This is the first and greatest commandment. And the second is like it: ‘Love your neighbor as yourself.’”","kjv":"Jesus said unto him, Thou shalt love the Lord thy God with all thy heart, and with all thy soul, and with all thy mind. This is the first and great commandment. And the second is like unto it, Thou shalt love thy neighbour as thyself."},"s":"Jesus in the temple courts during his final week, answering a legal expert’s test question about the greatest commandment.","m":"He joins two Old Testament texts, Deuteronomy 6:5 and Leviticus 19:18. He adds that all the Law and the Prophets hang on these two."},{"b":39,"c":28,"v":19,"e":20,"t":{"bsb":"Therefore go and make disciples of all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Spirit, and teaching them to obey all that I have commanded you. And surely I am with you always, even to the end of the age.","kjv":"Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost: Teaching them to observe all things whatsoever I have commanded you: and, lo, I am with you alway, even unto the end of the world. Amen."},"s":"The risen Jesus to the eleven disciples on a mountain in Galilee. These are the last words of Matthew’s Gospel.","m":"The one command in the Greek is “make disciples” (the King James Version has “teach all nations”); baptizing and teaching describe how. Matthew opened with the name Immanuel, “God with us,” and closes with the promise “I am with you always.”"},{"b":40,"c":9,"v":24,"e":24,"t":{"bsb":"Immediately the boy’s father cried out, “I do believe; help my unbelief!”","kjv":"And straightway the father of the child cried out, and said with tears, Lord, I believe; help thou mine unbelief."},"s":"A father whose son is thrown into convulsions by a spirit, speaking to Jesus after the disciples failed to help the boy.","m":"Jesus has just told him that everything is possible for one who believes. The man admits faith and doubt in the same breath, and Jesus drives the spirit out."},{"b":40,"c":10,"v":45,"e":45,"t":{"bsb":"For even the Son of Man did not come to be served, but to serve, and to give His life as a ransom for many.","kjv":"For even the Son of man came not to be ministered unto, but to minister, and to give his life a ransom for many."},"s":"Jesus on the road to Jerusalem, after James and John ask to sit at his right and left in his glory.","m":"The other ten are indignant, and Jesus tells them greatness among them means serving. A ransom was the price paid to free a slave or a captive."},{"b":41,"c":1,"v":37,"e":37,"t":{"bsb":"For no word from God will ever fail.","kjv":"For with God nothing shall be impossible."},"s":"The angel Gabriel to Mary in Nazareth, announcing that she will bear a son.","m":"As a sign, Gabriel tells her that her elderly relative Elizabeth is six months pregnant. The Greek can be read “no word from God will fail” or “nothing will be impossible with God,” and it echoes the question put to Abraham and Sarah: is anything too hard for the LORD?"},{"b":41,"c":2,"v":10,"e":11,"t":{"bsb":"But the angel said to them, “Do not be afraid! For behold, I bring you good news of great joy that will be for all the people: Today in the city of David a Savior has been born to you. He is Christ the Lord!”","kjv":"And the angel said unto them, Fear not: for, behold, I bring you good tidings of great joy, which shall be to all people. For unto you is born this day in the city of David a Saviour, which is Christ the Lord."},"s":"An angel to shepherds in the fields near Bethlehem on the night Jesus was born.","m":"The announcement goes first to shepherds working the night watch, and to no one in a palace. Three titles are packed into it: Savior, Christ and Lord."},{"b":41,"c":6,"v":31,"e":31,"t":{"bsb":"Do to others as you would have them do to you.","kjv":"And as ye would that men should do to you, do ye also to them likewise."},"s":"Jesus in the Sermon on the Plain, teaching a large crowd about loving their enemies.","m":"Often called the Golden Rule. Hillel and some other ancient teachers gave it in the negative, as a warning against doing to others what you would hate; Jesus states it as something to go and do."},{"b":41,"c":15,"v":20,"e":20,"t":{"bsb":"So he got up and went to his father. But while he was still in the distance, his father saw him and was filled with compassion. He ran to his son, embraced him, and kissed him.","kjv":"And he arose, and came to his father. But when he was yet a great way off, his father saw him, and had compassion, and ran, and fell on his neck, and kissed him."},"s":"From Jesus’ parable of the lost son, told to religious leaders who complained that he ate with sinners.","m":"The son has wasted his inheritance and rehearsed a speech asking to be taken on as a hired hand. His father sees him from far off and runs to him before a word of it is spoken."},{"b":41,"c":23,"v":34,"e":34,"t":{"bsb":"Then Jesus said, “Father, forgive them, for they do not know what they are doing.” And they divided up His garments by casting lots.","kjv":"Then said Jesus, Father, forgive them; for they know not what they do. And they parted his raiment, and cast lots."},"s":"Jesus on the cross at the place called the Skull, as the soldiers divide his clothes.","m":"This is traditionally counted the first of his seven sayings from the cross. Some early manuscripts of Luke lack the sentence, a fact many modern Bibles mention in a footnote."},{"b":42,"c":1,"v":1,"e":1,"t":{"bsb":"In the beginning was the Word, and the Word was with God, and the Word was God.","kjv":"In the beginning was the Word, and the Word was with God, and the Word was God."},"s":"The opening line of John’s Gospel, deliberately echoing the first words of Genesis.","m":"“Word” translates the Greek logos. John says the Word existed before creation, was with God and was God. Verse 14 says the Word became flesh, and verse 17 names him: Jesus Christ."},{"b":42,"c":1,"v":14,"e":14,"t":{"bsb":"The Word became flesh and made His dwelling among us. We have seen His glory, the glory of the one and only Son from the Father, full of grace and truth.","kjv":"And the Word was made flesh, and dwelt among us, (and we beheld his glory, the glory as of the only begotten of the Father,) full of grace and truth."},"s":"From the prologue that introduces John’s Gospel.","m":"The verb for dwelling is literally “pitched his tent,” the language of the tabernacle where God’s glory lived among Israel in the wilderness. John is saying that the same presence has come in a human life."},{"b":42,"c":3,"v":16,"e":16,"t":{"bsb":"For God so loved the world that He gave His one and only Son, that everyone who believes in Him shall not perish but have eternal life.","kjv":"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."},"s":"From the account of Jesus’ night-time conversation with Nicodemus, a Pharisee and member of the Jewish ruling council.","m":"The verses just before recall the bronze snake Moses lifted up in the desert, so that anyone bitten who looked at it lived. The next verse adds that the Son was sent to save the world rather than condemn it."},{"b":42,"c":8,"v":32,"e":32,"t":{"bsb":"Then you will know the truth, and the truth will set you free.","kjv":"And ye shall know the truth, and the truth shall make you free."},"s":"Jesus in the temple courts in Jerusalem, speaking to people who had begun to believe him.","m":"The thought starts a verse earlier with a condition: “If you continue in my word.” His hearers object that they have never been slaves, and he answers that everyone who sins is a slave to sin."},{"b":42,"c":10,"v":10,"e":10,"t":{"bsb":"The thief comes only to steal and kill and destroy. I have come that they may have life, and have it in all its fullness.","kjv":"The thief cometh not, but for to steal, and to kill, and to destroy: I am come that they might have life, and that they might have it more abundantly."},"s":"Jesus in Jerusalem, describing himself as the gate for the sheep and the good shepherd.","m":"The thief stands for the false shepherds he has been describing, leaders who use the flock for themselves. In the next verse he says the good shepherd lays down his life for the sheep."},{"b":42,"c":11,"v":35,"e":35,"t":{"bsb":"Jesus wept.","kjv":"Jesus wept."},"s":"Jesus outside Bethany, on his way to the tomb of his friend Lazarus, with Lazarus’s sister Mary and the mourners who came with her.","m":"The shortest verse in most English Bibles. By John’s account Jesus is about to raise Lazarus, and he weeps anyway; the onlookers say, “See how he loved him.”"},{"b":42,"c":13,"v":34,"e":35,"t":{"bsb":"A new commandment I give you: Love one another. As I have loved you, so you also must love one another. By this everyone will know that you are My disciples, if you love one another.","kjv":"A new commandment I give unto you, That ye love one another; as I have loved you, that ye also love one another. By this shall all men know that ye are my disciples, if ye have love one to another."},"s":"Jesus at the Last Supper, after washing his disciples’ feet and after Judas has left the room.","m":"Loving your neighbor was already commanded in Leviticus. What is new is the standard, “as I have loved you,” spoken hours before the cross."},{"b":42,"c":14,"v":6,"e":6,"t":{"bsb":"Jesus answered, “I am the way and the truth and the life. No one comes to the Father except through Me.”","kjv":"Jesus saith unto him, I am the way, the truth, and the life: no man cometh unto the Father, but by me."},"s":"Jesus at the Last Supper, answering Thomas, who has said they do not know where he is going or how to get there.","m":"It is one of seven “I am” sayings traditionally counted in John’s Gospel. Jesus has just said he is going to prepare a place in his Father’s house and will come back for them."},{"b":42,"c":14,"v":27,"e":27,"t":{"bsb":"Peace I leave with you; My peace I give to you. I do not give to you as the world gives. Do not let your hearts be troubled; do not be afraid.","kjv":"Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid."},"s":"Jesus at the Last Supper, hours before his arrest.","m":"“Peace” was the everyday Jewish word for hello and goodbye. He gives it as a parting gift on the night his disciples will scatter."},{"b":42,"c":15,"v":13,"e":13,"t":{"bsb":"Greater love has no one than this, that he lay down his life for his friends.","kjv":"Greater love hath no man than this, that a man lay down his life for his friends."},"s":"Jesus on the night of the Last Supper, in his teaching on the vine and the branches.","m":"He has just repeated the command to love one another as he has loved them. In the next verses he calls the disciples friends instead of servants, on the night before he dies."},{"b":42,"c":16,"v":33,"e":33,"t":{"bsb":"I have told you these things so that in Me you may have peace. In the world you will have tribulation. But take courage; I have overcome the world!","kjv":"These things I have spoken unto you, that in me ye might have peace. In the world ye shall have tribulation: but be of good cheer; I have overcome the world."},"s":"The last line of Jesus’ farewell teaching on the night of the Last Supper, before he prays and goes out to be arrested.","m":"He has just told the disciples they will scatter and leave him alone. Trouble is promised as plainly as peace, and the confidence rests on what he has done."},{"b":42,"c":20,"v":29,"e":29,"t":{"bsb":"Jesus said to him, “Because you have seen Me, you have believed; blessed are those who have not seen and yet have believed.”","kjv":"Jesus saith unto him, Thomas, because thou hast seen me, thou hast believed: blessed are they that have not seen, and yet have believed."},"s":"The risen Jesus to Thomas, a week after the resurrection.","m":"Thomas had refused to believe without touching the wounds; now he answers, “My Lord and my God.” Two verses later John says this is why he wrote, so that readers who have not seen may believe."},{"b":43,"c":1,"v":8,"e":8,"t":{"bsb":"But you will receive power when the Holy Spirit comes upon you, and you will be My witnesses in Jerusalem, and in all Judea and Samaria, and to the ends of the earth.","kjv":"But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me both in Jerusalem, and in all Judaea, and in Samaria, and unto the uttermost part of the earth."},"s":"The risen Jesus to his apostles on the Mount of Olives, just before he is taken up.","m":"They had asked whether he was about to restore the kingdom to Israel. His answer doubles as an outline of the book of Acts: Jerusalem, then Judea and Samaria, then the wider world."},{"b":43,"c":20,"v":35,"e":35,"t":{"bsb":"In everything, I showed you that by this kind of hard work we must help the weak, remembering the words of the Lord Jesus Himself: ‘It is more blessed to give than to receive.’","kjv":"I have shewed you all things, how that so labouring ye ought to support the weak, and to remember the words of the Lord Jesus, how he said, It is more blessed to give than to receive."},"s":"Paul’s farewell to the elders of the church at Ephesus, who have come to meet him at Miletus.","m":"Paul reminds them that he worked with his own hands to support himself and his companions. The saying he quotes from Jesus is recorded in none of the four Gospels."},{"b":44,"c":1,"v":16,"e":16,"t":{"bsb":"I am not ashamed of the gospel, because it is the power of God for salvation to everyone who believes, first to the Jew, then to the Greek.","kjv":"For I am not ashamed of the gospel of Christ: for it is the power of God unto salvation to every one that believeth; to the Jew first, and also to the Greek."},"s":"Paul’s statement of his theme near the start of his letter to the Christians in Rome, a city he had not yet visited.","m":"Rome prized power and status, and the message of a crucified Messiah had neither. Paul says the gospel is itself God’s power, and his phrase about the Jew first reflects Israel’s place in God’s plan, which was also the order in which the message spread."},{"b":44,"c":3,"v":23,"e":24,"t":{"bsb":"…for all have sinned and fall short of the glory of God, and are justified freely by His grace through the redemption that is in Christ Jesus.","kjv":"For all have sinned, and come short of the glory of God; Being justified freely by his grace through the redemption that is in Christ Jesus…"},"s":"Paul to the church in Rome, concluding an argument that Jew and Gentile alike stand guilty before God.","m":"Verse 23 is half a sentence. It runs straight on into verse 24, where being put right with God comes freely, as a gift."},{"b":44,"c":5,"v":8,"e":8,"t":{"bsb":"But God proves His love for us in this: While we were still sinners, Christ died for us.","kjv":"But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us."},"s":"Paul to the church in Rome, explaining why believers can be sure of God’s love.","m":"He grants that someone might possibly die for a good person. His proof is the timing: Christ died while people were still sinners, before any change on their part."},{"b":44,"c":6,"v":23,"e":23,"t":{"bsb":"For the wages of sin is death, but the gift of God is eternal life in Christ Jesus our Lord.","kjv":"For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord."},"s":"Paul to the church in Rome, closing a chapter that compares two masters, sin and God.","m":"The contrast is between pay and a present. Sin pays out what has been earned; eternal life cannot be earned and is given."},{"b":44,"c":8,"v":1,"e":1,"t":{"bsb":"Therefore, there is now no condemnation for those who are in Christ Jesus.","kjv":"There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit."},"s":"Paul to the church in Rome. Chapter 7 has just ended with his cry of wretchedness over the pull of sin.","m":"“Therefore” ties this verse to that struggle and to the whole letter so far. The chapter that opens with no condemnation ends with no separation. The King James Version adds a clause here from later manuscripts; every version has it at verse 4."},{"b":44,"c":8,"v":28,"e":28,"t":{"bsb":"And we know that God works all things together for the good of those who love Him, who are called according to His purpose.","kjv":"And we know that all things work together for good to them that love God, to them who are the called according to his purpose."},"s":"Paul to the church in Rome, in a passage about present suffering and future glory.","m":"The verse does not call everything good; the lines around it speak of hardship, persecution and famine. Verse 29 points to the good in view: being shaped into the likeness of Christ."},{"b":44,"c":8,"v":38,"e":39,"t":{"bsb":"For I am convinced that neither death nor life, neither angels nor principalities, neither the present nor the future, nor any powers, neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God that is in Christ Jesus our Lord.","kjv":"For I am persuaded, that neither death, nor life, nor angels, nor principalities, nor powers, nor things present, nor things to come, Nor height, nor depth, nor any other creature, shall be able to separate us from the love of God, which is in Christ Jesus our Lord."},"s":"The climax of Romans 8.","m":"Paul has just listed hardships, most of which he had faced himself: trouble, persecution, hunger, danger, the sword. His list here covers every direction he can think of, in time, in space and in the unseen world."},{"b":44,"c":12,"v":2,"e":2,"t":{"bsb":"Do not be conformed to this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what is the good, pleasing, and perfect will of God.","kjv":"And be not conformed to this world: but be ye transformed by the renewing of your mind, that ye may prove what is that good, and acceptable, and perfect, will of God."},"s":"Paul turns from eleven chapters of teaching to how the Christians in Rome should live.","m":"“Conformed” pictures being pressed into a mould from outside. “Transformed” translates the Greek word behind “metamorphosis,” and the change he describes begins with how a person thinks."},{"b":44,"c":15,"v":13,"e":13,"t":{"bsb":"Now may the God of hope fill you with all joy and peace as you believe in Him, so that you may overflow with hope by the power of the Holy Spirit.","kjv":"Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, through the power of the Holy Ghost."},"s":"A blessing Paul prays over the Roman church as he finishes the main body of his letter.","m":"It closes a section urging Jewish and Gentile believers to accept one another. Hope here means confidence about the future that rests on God’s promises."},{"b":45,"c":10,"v":13,"e":13,"t":{"bsb":"No temptation has seized you except what is common to man. And God is faithful; He will not let you be tempted beyond what you can bear. But when you are tempted, He will also provide an escape, so that you can stand up under it.","kjv":"There hath no temptation taken you but such as is common to man: but God is faithful, who will not suffer you to be tempted above that ye are able; but will with the temptation also make a way to escape, that ye may be able to bear it."},"s":"Paul to the church in Corinth, after recalling how Israel fell in the wilderness.","m":"The verse before warns anyone who thinks he is standing firm to be careful not to fall. The promise concerns temptation and a way through it. Paul says elsewhere that he was burdened beyond his own strength (2 Corinthians 1:8)."},{"b":45,"c":13,"v":4,"e":7,"t":{"bsb":"Love is patient, love is kind. It does not envy, it does not boast, it is not proud. It is not rude, it is not self-seeking, it is not easily angered, it keeps no account of wrongs. Love takes no pleasure in evil, but rejoices in the truth. It bears all things, believes all things, hopes all things, endures all things.","kjv":"Charity suffereth long, and is kind; charity envieth not; charity vaunteth not itself, is not puffed up, Doth not behave itself unseemly, seeketh not her own, is not easily provoked, thinketh no evil; Rejoiceth not in iniquity, but rejoiceth in the truth; Beareth all things, believeth all things, hopeth all things, endureth all things."},"s":"Paul to the church in Corinth, which was quarrelling over whose spiritual gifts mattered most.","m":"It is read at weddings, though Paul wrote it to correct a divided congregation. Several lines answer faults he has named earlier in the letter: envy, boasting, pride. Where the King James Version says “charity,” the Greek word is agape."},{"b":45,"c":16,"v":13,"e":14,"t":{"bsb":"Be on the alert. Stand firm in the faith. Be men of courage. Be strong. Do everything in love.","kjv":"Watch ye, stand fast in the faith, quit you like men, be strong. Let all your things be done with charity."},"s":"Paul’s closing instructions to the church in Corinth.","m":"Four short commands in the language of soldiers on watch are followed by a fifth that governs them all. It sums up a letter to a gifted church that kept failing at love (“charity” in the King James Version)."},{"b":46,"c":5,"v":17,"e":17,"t":{"bsb":"Therefore if anyone is in Christ, he is a new creation. The old has passed away. Behold, the new has come!","kjv":"Therefore if any man be in Christ, he is a new creature: old things are passed away; behold, all things are become new."},"s":"Paul to the church in Corinth, explaining why he no longer measures anyone by outward standards.","m":"The Greek is abrupt: “If anyone in Christ, new creation.” The following verses say this is God’s doing, reconciling the world to himself through Christ."},{"b":46,"c":12,"v":9,"e":9,"t":{"bsb":"But He said to me, “My grace is sufficient for you, for My power is perfected in weakness.” Therefore I will boast all the more gladly in my weaknesses, so that the power of Christ may rest on me.","kjv":"And he said unto me, My grace is sufficient for thee: for my strength is made perfect in weakness. Most gladly therefore will I rather glory in my infirmities, that the power of Christ may rest upon me."},"s":"Paul to the church in Corinth, describing a “thorn in the flesh” he asked the Lord three times to remove.","m":"He never says what the thorn was. The request was refused, and this sentence is the answer he was given."},{"b":47,"c":2,"v":20,"e":20,"t":{"bsb":"I have been crucified with Christ, and I no longer live, but Christ lives in me. The life I live in the body, I live by faith in the Son of God, who loved me and gave Himself up for me.","kjv":"I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me: and the life which I now live in the flesh I live by the faith of the Son of God, who loved me, and gave himself for me."},"s":"Paul to the churches of Galatia, recounting how he confronted Peter at Antioch.","m":"Under pressure from visitors, Peter had stopped eating with Gentile believers. Paul answers that his standing with God rests on Christ and no longer on keeping the Law."},{"b":47,"c":5,"v":22,"e":23,"t":{"bsb":"But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, and self-control. Against such things there is no law.","kjv":"But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, Meekness, temperance: against such there is no law."},"s":"Paul to the churches of Galatia, contrasting life by the Spirit with what the flesh produces.","m":"“Fruit” is singular, nine qualities described as one harvest. The list before it is a list of works, or acts; this one is called fruit, something that grows."},{"b":47,"c":6,"v":9,"e":9,"t":{"bsb":"Let us not grow weary in well-doing, for in due time we will reap a harvest if we do not give up.","kjv":"And let us not be weary in well doing: for in due season we shall reap, if we faint not."},"s":"Paul’s closing appeal to the churches of Galatia.","m":"He has just used a farming picture: a person reaps what he sows. Harvest comes in its season, and the next verse turns the picture into a task, doing good to everyone as opportunity allows."},{"b":48,"c":2,"v":8,"e":9,"t":{"bsb":"For it is by grace you have been saved through faith, and this not from yourselves; it is the gift of God, not by works, so that no one can boast.","kjv":"For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: Not of works, lest any man should boast."},"s":"Paul to the Christians in and around Ephesus, describing how God made them alive when they were spiritually dead.","m":"The next verse completes the thought. People are not saved by good works, and they are created in Christ for good works that God prepared in advance."},{"b":48,"c":4,"v":32,"e":32,"t":{"bsb":"Be kind and tenderhearted to one another, forgiving each other just as in Christ God forgave you.","kjv":"And be ye kind one to another, tenderhearted, forgiving one another, even as God for Christ’s sake hath forgiven you."},"s":"Paul to the Ephesian church, in practical instructions about speech and anger.","m":"It closes a list of things to put away: bitterness, rage, shouting, slander. The measure for forgiving others is the way God forgave them in Christ."},{"b":49,"c":1,"v":6,"e":6,"t":{"bsb":"…being confident of this, that He who began a good work in you will carry it on to completion until the day of Christ Jesus.","kjv":"Being confident of this very thing, that he which hath begun a good work in you will perform it until the day of Jesus Christ…"},"s":"Paul, writing in chains, to the church at Philippi, the first he founded in Europe.","m":"He is thanking God for their partnership in the gospel from the first day. The “day” in view is the day of Christ’s return, so the work is finished on God’s timetable."},{"b":49,"c":2,"v":3,"e":4,"t":{"bsb":"Do nothing out of selfish ambition or empty pride, but in humility consider others more important than yourselves. Each of you should look not only to your own interests, but also to the interests of others.","kjv":"Let nothing be done through strife or vainglory; but in lowliness of mind let each esteem other better than themselves. Look not every man on his own things, but every man also on the things of others."},"s":"Paul to the Philippians, urging a church with some friction in it to be united.","m":"These verses lead into a passage about Christ, often thought to be an early hymn, who took the form of a servant and humbled himself to death on a cross. Paul’s instruction is to share that mindset."},{"b":49,"c":4,"v":6,"e":7,"t":{"bsb":"Be anxious for nothing, but in everything, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.","kjv":"Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God. And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus."},"s":"Paul, a prisoner, to the Philippians.","m":"The verb translated “guard” (“keep” in the King James Version) is a military one, used of a garrison watching over a city, and Philippi was a Roman colony settled by veterans. The sentence just before says the Lord is near."},{"b":49,"c":4,"v":8,"e":8,"t":{"bsb":"Finally, brothers, whatever is true, whatever is honorable, whatever is right, whatever is pure, whatever is lovely, whatever is admirable—if anything is excellent or praiseworthy—think on these things.","kjv":"Finally, brethren, whatsoever things are true, whatsoever things are honest, whatsoever things are just, whatsoever things are pure, whatsoever things are lovely, whatsoever things are of good report; if there be any virtue, and if there be any praise, think on these things."},"s":"Paul’s closing advice to the Philippians.","m":"Several words in the list were common in Greek moral teaching of the time. Paul tells them to dwell on such things and, in the next verse, to practise what they saw in him."},{"b":49,"c":4,"v":13,"e":13,"t":{"bsb":"I can do all things through Christ who gives me strength.","kjv":"I can do all things through Christ which strengtheneth me."},"s":"Paul, in prison, thanking the Philippians for a gift of money.","m":"He has just said he has learned to be content whether well fed or hungry, with plenty or with nothing. “All things” refers to that list. The strength is for enduring whatever comes."},{"b":50,"c":3,"v":23,"e":24,"t":{"bsb":"Whatever you do, work at it with your whole being, for the Lord and not for men, because you know that you will receive an inheritance from the Lord as your reward. It is the Lord Christ you are serving.","kjv":"And whatsoever ye do, do it heartily, as to the Lord, and not unto men; Knowing that of the Lord ye shall receive the reward of the inheritance: for ye serve the Lord Christ."},"s":"Paul to the church at Colossae, in instructions for households.","m":"These words were first addressed to slaves, people with no say over their work. Paul tells them their true master is Christ, who will reward them, and then tells masters to treat them justly."},{"b":51,"c":5,"v":16,"e":18,"t":{"bsb":"Rejoice at all times. Pray without ceasing. Give thanks in every circumstance, for this is God’s will for you in Christ Jesus.","kjv":"Rejoice evermore. Pray without ceasing. In every thing give thanks: for this is the will of God in Christ Jesus concerning you."},"s":"The close of Paul’s letter to the young church in Thessalonica, among the earliest of his letters.","m":"The church was facing persecution and grieving members who had died. The wording is thanks in every circumstance, which is different from thanks for every circumstance."},{"b":53,"c":4,"v":12,"e":12,"t":{"bsb":"Let no one despise your youth, but set an example for the believers in speech, in conduct, in love, in faith, in purity.","kjv":"Let no man despise thy youth; but be thou an example of the believers, in word, in conversation, in charity, in spirit, in faith, in purity."},"s":"Paul to Timothy, whom he had left in charge of the church at Ephesus.","m":"Timothy was young for the authority he held, and some of those he had to correct were his elders. Paul’s answer to being looked down on is to set the example himself."},{"b":53,"c":6,"v":10,"e":10,"t":{"bsb":"For the love of money is the root of all kinds of evil. By craving it, some have wandered away from the faith and pierced themselves with many sorrows.","kjv":"For the love of money is the root of all evil: which while some coveted after, they have erred from the faith, and pierced themselves through with many sorrows."},"s":"Paul to Timothy, warning about teachers who treat godliness as a way to get rich.","m":"Often shortened to “money is the root of all evil.” Paul’s target is the love of it, and most modern versions translate “all kinds of evil.”"},{"b":54,"c":1,"v":7,"e":7,"t":{"bsb":"For God has not given us a spirit of fear, but of power, love, and self-control.","kjv":"For God hath not given us the spirit of fear; but of power, and of love, and of a sound mind."},"s":"Paul, in prison in Rome and expecting to die, to his younger co-worker Timothy.","m":"Timothy seems to have been timid, and Paul has just urged him to fan into flame the gift he was given. The next verse asks him not to be ashamed of the message or of Paul’s chains."},{"b":54,"c":3,"v":16,"e":17,"t":{"bsb":"All Scripture is God-breathed and is useful for instruction, for conviction, for correction, and for training in righteousness, so that the man of God may be complete, fully equipped for every good work.","kjv":"All scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness: That the man of God may be perfect, throughly furnished unto all good works."},"s":"From Paul’s last letter, to Timothy, who had known the Scriptures since childhood.","m":"“God-breathed,” or “inspired,” translates a single Greek word, theopneustos, found only here in the New Testament. The Scriptures Timothy grew up with were what Christians now call the Old Testament."},{"b":57,"c":4,"v":12,"e":12,"t":{"bsb":"For the word of God is living and active. Sharper than any double-edged sword, it pierces even to dividing soul and spirit, joints and marrow. It judges the thoughts and intentions of the heart.","kjv":"For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart."},"s":"An anonymous letter to Jewish Christians tempted to give up. The writer has been warning them from Psalm 95 not to harden their hearts.","m":"The “word” in view is God’s spoken warning and promise, which exposes what is really in a person. The next verse says nothing in creation is hidden from his sight."},{"b":57,"c":11,"v":1,"e":1,"t":{"bsb":"Now faith is the assurance of what we hope for and the certainty of what we do not see.","kjv":"Now faith is the substance of things hoped for, the evidence of things not seen."},"s":"The opening of a chapter that surveys Old Testament men and women of faith, from Abel to the prophets.","m":"The examples that follow show faith as acting on God’s promise before seeing the result. The writer notes that many of them died without receiving what was promised."},{"b":57,"c":12,"v":11,"e":11,"t":{"bsb":"No discipline seems enjoyable at the time, but painful. Later on, however, it yields a harvest of righteousness and peace to those who have been trained by it.","kjv":"Now no chastening for the present seemeth to be joyous, but grievous: nevertheless afterward it yieldeth the peaceable fruit of righteousness unto them which are exercised thereby."},"s":"The writer of Hebrews to believers worn down by hardship.","m":"He has compared their suffering to a father training his children. The word for “trained,” or “exercised,” is the Greek behind “gymnasium,” the language of athletic practice."},{"b":57,"c":13,"v":8,"e":8,"t":{"bsb":"Jesus Christ is the same yesterday and today and forever.","kjv":"Jesus Christ the same yesterday, and to day, and for ever."},"s":"From the closing instructions of the letter to the Hebrews.","m":"It sits between a call to remember the leaders who first taught them and a warning against strange teachings. Leaders come and go, and the one they preached does not change."},{"b":58,"c":1,"v":2,"e":4,"t":{"bsb":"Consider it pure joy, my brothers, when you encounter trials of many kinds, because you know that the testing of your faith develops perseverance. Allow perseverance to finish its work, so that you may be mature and complete, not lacking anything.","kjv":"My brethren, count it all joy when ye fall into divers temptations; Knowing this, that the trying of your faith worketh patience. But let patience have her perfect work, that ye may be perfect and entire, wanting nothing."},"s":"James, a leader of the church in Jerusalem, to Jewish Christians scattered abroad.","m":"He treats trials as a test that produces endurance, and endurance as the road to maturity. The Greek word covers both “trial” and “temptation,” which is why older versions say “temptations.”"},{"b":58,"c":1,"v":5,"e":5,"t":{"bsb":"Now if any of you lacks wisdom, he should ask God, who gives generously to all without finding fault, and it will be given to him.","kjv":"If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him."},"s":"James to scattered Jewish Christians, straight after his words about trials.","m":"The wisdom in view is knowing how to live through testing. God is described as giving generously and without finding fault, and the next verse adds that the asking should be done in faith."},{"b":58,"c":1,"v":19,"e":20,"t":{"bsb":"My beloved brothers, understand this: Everyone should be quick to listen, slow to speak, and slow to anger, for man’s anger does not bring about the righteousness that God desires.","kjv":"Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath: For the wrath of man worketh not the righteousness of God."},"s":"James, writing to congregations troubled by sharp tongues and quarrels.","m":"Two of the three commands are about slowing down. Speech is a main theme of the letter, and chapter 3 calls the tongue a small spark that sets a forest on fire."},{"b":58,"c":1,"v":22,"e":22,"t":{"bsb":"Be doers of the word, and not hearers only. Otherwise, you are deceiving yourselves.","kjv":"But be ye doers of the word, and not hearers only, deceiving your own selves."},"s":"James, pressing his readers to act on what they hear read aloud when they gather.","m":"He compares the hearer who does nothing to a man who looks in a mirror and at once forgets his own face. Most people then heard Scripture read aloud, and few owned a copy."},{"b":59,"c":3,"v":15,"e":15,"t":{"bsb":"But in your hearts sanctify Christ as Lord. Always be prepared to give a defense to everyone who asks you the reason for the hope that is in you. But respond with gentleness and respect…","kjv":"But sanctify the Lord God in your hearts: and be ready always to give an answer to every man that asketh you a reason of the hope that is in you with meekness and fear…"},"s":"Peter to Christians in Asia Minor who were being slandered for their faith.","m":"The verse assumes that people will ask. The answer is to be given gently and with respect, and the surrounding verses are about suffering for doing good."},{"b":59,"c":5,"v":7,"e":7,"t":{"bsb":"Cast all your anxiety on Him, because He cares for you.","kjv":"Casting all your care upon him; for he careth for you."},"s":"From Peter’s closing instructions to churches under pressure in Asia Minor.","m":"In Greek this continues the sentence before it: humble yourselves under God’s mighty hand, casting your anxiety on him. Handing over worry is one of the ways humility is practised."},{"b":60,"c":3,"v":9,"e":9,"t":{"bsb":"The Lord is not slow in keeping His promise as some understand slowness, but is patient with you, not wanting anyone to perish but everyone to come to repentance.","kjv":"The Lord is not slack concerning his promise, as some men count slackness; but is longsuffering to us-ward, not willing that any should perish, but that all should come to repentance."},"s":"Peter, answering scoffers who ask why Christ’s promised return has not happened.","m":"He has just said that with the Lord a day is like a thousand years. The delay, he argues, is patience that leaves time for repentance."},{"b":61,"c":1,"v":9,"e":9,"t":{"bsb":"If we confess our sins, He is faithful and just to forgive us our sins and to cleanse us from all unrighteousness.","kjv":"If we confess our sins, he is faithful and just to forgive us our sins, and to cleanse us from all unrighteousness."},"s":"John to churches unsettled by false teachers, answering the claim to be without sin.","m":"The verses on either side quote that claim and reject it. Forgiveness is tied here to God’s faithfulness and justice."},{"b":61,"c":4,"v":19,"e":19,"t":{"bsb":"We love because He first loved us.","kjv":"We love him, because he first loved us."},"s":"John, in a letter that returns again and again to love.","m":"The sentence explains where love comes from. The next verse draws the test: anyone who claims to love God while hating a brother or sister is a liar. Many later manuscripts, followed by the King James Version, read “We love him.”"},{"b":64,"c":1,"v":24,"e":25,"t":{"bsb":"Now to Him who is able to keep you from stumbling and to present you unblemished in His glorious presence, with great joy—to the only God our Savior be glory, majesty, dominion, and authority through Jesus Christ our Lord before all time, and now, and for all eternity. Amen.","kjv":"Now unto him that is able to keep you from falling, and to present you faultless before the presence of his glory with exceeding joy, To the only wise God our Saviour, be glory and majesty, dominion and power, both now and ever. Amen."},"s":"The closing words of Jude’s short letter, written to warn a church about false teachers who had slipped in.","m":"After a letter full of warnings, the last word is about God’s ability to keep his people from falling. It is often spoken to close a church service."},{"b":65,"c":1,"v":8,"e":8,"t":{"bsb":"“I am the Alpha and the Omega,” says the Lord God, who is and was and is to come—the Almighty.","kjv":"I am Alpha and Omega, the beginning and the ending, saith the Lord, which is, and which was, and which is to come, the Almighty."},"s":"The opening of Revelation, John’s vision written down for seven churches in Asia Minor.","m":"Alpha and omega are the first and last letters of the Greek alphabet. The title is spoken again at the end of the book, in chapters 21 and 22."},{"b":65,"c":3,"v":20,"e":20,"t":{"bsb":"Behold, I stand at the door and knock. If anyone hears My voice and opens the door, I will come in and dine with him, and he with Me.","kjv":"Behold, I stand at the door, and knock: if any man hear my voice, and open the door, I will come in to him, and will sup with him, and he with me."},"s":"The risen Christ to the church in Laodicea, a wealthy city, in the last of seven letters to churches in Asia Minor.","m":"The words are addressed to a congregation that Jesus has just called lukewarm. Sharing a meal was a sign of acceptance and friendship."},{"b":65,"c":21,"v":4,"e":4,"t":{"bsb":"‘He will wipe away every tear from their eyes,’ and there will be no more death or mourning or crying or pain, for the former things have passed away.","kjv":"And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away."},"s":"John’s vision of a new heaven and a new earth, near the end of the Bible.","m":"A loud voice has just announced that God’s dwelling is now with humanity. The promise echoes Isaiah 25:8, where God swallows up death and wipes the tears from every face."}];
+var BOOKS=["Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"];
+var CHAPS=[50,40,27,36,34,24,21,4,31,24,22,25,29,36,10,13,10,42,150,31,12,8,66,52,5,48,12,14,3,9,1,4,7,3,3,3,2,14,4,28,16,24,21,28,16,16,13,6,6,4,4,5,3,6,4,3,1,13,5,5,3,5,1,1,1,22];
+var PICS=[{"id":"playuela","w":1080,"h":1440,"fy":0.0,"k":0.42,"tint":[19,19,19],"short":"La Playuela, Cabo Rojo, Puerto Rico","place":"La Playuela beach, Cabo Rojo, Puerto Rico","credit":"José Gilberto Martínez/USFWS"},{"id":"wassaw","w":1080,"h":1440,"fy":0.6,"k":0.58,"tint":[20,19,19],"short":"Wassaw National Wildlife Refuge, Georgia","place":"Boneyard beach, Wassaw National Wildlife Refuge, Georgia","credit":"Monica Harris/USFWS"},{"id":"cahaba","w":1080,"h":1440,"fy":0.5,"k":0.56,"up":1,"dy":0.05,"tint":[20,21,18],"short":"Cahaba River, Alabama","place":"Cahaba River National Wildlife Refuge, Alabama","credit":"Jennifer Grunewald/USFWS"},{"id":"pelicans","w":810,"h":1080,"fy":0.8,"k":0.48,"tint":[20,20,18],"short":"Breton National Wildlife Refuge, Louisiana","place":"Pelicans and terns, Breton National Wildlife Refuge, Louisiana","credit":"USFWS"},{"id":"vista","w":844,"h":1125,"fy":0.7,"k":0.62,"up":1,"dy":0.07,"tint":[18,20,19],"short":"Southern Appalachians, Virginia","place":"Southern Appalachian mountaintop, Virginia","credit":"Gary Peeples/USFWS"},{"id":"manatee","w":1080,"h":1440,"fy":0.6,"k":0.4,"up":1,"max":190,"tint":[15,23,22],"short":"Crystal River, Florida","place":"Manatee near Crystal River National Wildlife Refuge, Florida","credit":"Keith Ramos/USFWS"},{"id":"treefrog","w":1080,"h":1440,"fy":0.3,"k":0.62,"max":110,"tint":[28,29,10],"short":"Reelfoot National Wildlife Refuge, Tennessee","place":"Green treefrog, Reelfoot National Wildlife Refuge, Tennessee","credit":"Lily Thigpen/USFWS"},{"id":"umstead","w":810,"h":1080,"fy":0.4,"k":0.56,"tint":[17,20,21],"short":"Umstead State Park, North Carolina","place":"William B. Umstead State Park, North Carolina","credit":"Jordan Bush, USGS National CASC"},{"id":"longleaf","w":900,"h":1200,"fy":0.5,"k":0.5,"tint":[22,20,16],"short":"Carolina Sandhills, South Carolina","place":"Longleaf pine, Carolina Sandhills National Wildlife Refuge, South Carolina","credit":"Jack Culpepper, USFWS"},{"id":"cypress","w":810,"h":1080,"fy":0.6,"k":0.56,"tint":[20,21,17],"short":"Big Lake National Wildlife Refuge, Arkansas","place":"Cypress trees, Big Lake National Wildlife Refuge, Arkansas","credit":"Jeremy Bennett, USFWS"},{"id":"blackbeard","w":810,"h":1080,"fy":0.5,"k":0.56,"tint":[29,16,10],"short":"Blackbeard Island, Georgia","place":"Sunset at Blackbeard Island, Georgia","credit":"Molly Martin, USFWS"},{"id":"saltflats","w":810,"h":1080,"fy":0.5,"k":0.68,"up":1,"tint":[22,20,16],"short":"Cabo Rojo salt flats, Puerto Rico","place":"Salt flats, Cabo Rojo National Wildlife Refuge, Puerto Rico","credit":"USFWS"},{"id":"chassahowitzka","w":810,"h":1080,"fy":0.5,"k":0.4,"tint":[20,24,14],"short":"Chassahowitzka refuge, Florida","place":"Chassahowitzka National Wildlife Refuge, Florida","credit":"Joyce Kleen, USFWS"},{"id":"cumberland","w":810,"h":1080,"fy":0.5,"k":0.66,"up":1,"tint":[27,29,10],"short":"Cumberland Island, Georgia","place":"Salt marsh, Cumberland Island National Seashore, Georgia","credit":"National Park Service"},{"id":"laguna","w":810,"h":1080,"fy":0.5,"k":0.4,"tint":[20,23,15],"short":"Laguna Cartagena, Puerto Rico","place":"Laguna Cartagena National Wildlife Refuge, Puerto Rico","credit":"G. Burgos, USFWS"},{"id":"littletn","w":810,"h":1080,"fy":0.5,"k":0.62,"up":1,"tint":[19,19,20],"short":"Little Tennessee River","place":"Little Tennessee River","credit":"USFWS"},{"id":"bulls","w":838,"h":1118,"fy":0.5,"k":0.62,"up":1,"tint":[21,22,16],"short":"Bulls Island, South Carolina","place":"Marsh on Bulls Island, Cape Romain National Wildlife Refuge, South Carolina","credit":"USFWS"},{"id":"poplar","w":786,"h":1048,"fy":0.2,"k":0.62,"tint":[19,21,17],"short":"Pine Knob, North Carolina","place":"Poplar leaves, Pine Knob, western North Carolina","credit":"Gary Peeples, USFWS"},{"id":"joshua","w":592,"h":789,"fy":0.4,"k":0.46,"tint":[20,17,21],"short":"Joshua trees at dusk","place":"Joshua trees at dusk","credit":"NPS / Emily Hassell"},{"id":"prairie","w":810,"h":1080,"fy":0.4,"k":0.5,"up":1,"tint":[27,19,11],"short":"Neal Smith refuge, Iowa","place":"Prairie at Neal Smith National Wildlife Refuge, Iowa","credit":"Doreen Van Ryswyk, USFWS"},{"id":"ocmulgee","w":957,"h":1276,"fy":0.5,"k":0.62,"up":1,"dy":0.08,"tint":[22,24,14],"short":"Ocmulgee Mounds, Georgia","place":"Ocmulgee Mounds National Historical Park, Georgia","credit":"National Park Service"},{"id":"agave","w":810,"h":1080,"fy":0.6,"k":0.58,"up":1,"tint":[24,24,14],"short":"St. Croix, U.S. Virgin Islands","place":"Agave on St. Croix, U.S. Virgin Islands","credit":"Rua Mordecai, USFWS"},{"id":"seabass","w":810,"h":1080,"fy":0.5,"k":0.54,"up":1,"max":170,"tint":[25,22,13],"short":"Gray's Reef, Georgia","place":"Black sea bass, Gray's Reef National Marine Sanctuary, Georgia","credit":"Greg McFall, NOAA"},{"id":"grouper","w":810,"h":1080,"fy":0.7,"k":0.6,"up":1,"dy":0.06,"tint":[23,18,15],"short":"Florida Keys","place":"Red grouper, Florida Keys National Marine Sanctuary","credit":"Greg McFall/NOAA"},{"id":"snapper","w":810,"h":1080,"fy":0.4,"k":0.56,"tint":[15,21,23],"short":"Flower Garden Banks, Gulf of Mexico","place":"Flower Garden Banks National Marine Sanctuary, Gulf of Mexico","credit":"G. P. Schmahl, NOAA"},{"id":"chandeleur","w":810,"h":1080,"fy":0.6,"k":0.7,"up":1,"tint":[11,18,27],"short":"Chandeleur Islands, Louisiana","place":"Chandeleur Islands, Louisiana","credit":"Erik Zobrist, NOAA Restoration Center"},{"id":"hatchling","w":879,"h":1172,"fy":1.0,"k":0.56,"up":1,"dy":0.12,"tint":[19,20,20],"short":"Blackbeard Island, Georgia","place":"Loggerhead hatchling, Blackbeard Island, Georgia","credit":"Becky Skiba, USFWS"},{"id":"warbler","w":810,"h":1080,"fy":0.7,"k":0.4,"up":1,"dy":-0.14,"max":150,"tint":[22,23,15],"short":"Congaree National Park, South Carolina","place":"Prothonotary warbler, Congaree National Park, South Carolina","credit":"National Park Service"},{"id":"waccamaw","w":718,"h":958,"fy":0.5,"k":0.5,"tint":[21,17,20],"short":"Waccamaw refuge, South Carolina","place":"Sunrise at Waccamaw National Wildlife Refuge, South Carolina","credit":"USFWS"},{"id":"stsimons","w":734,"h":978,"fy":0.4,"k":0.54,"tint":[15,18,23],"short":"St. Simons Island, Georgia","place":"Salt marsh at St. Simons Island, Georgia","credit":"George Gentry, USFWS"},{"id":"natchez","w":718,"h":957,"fy":0.4,"k":0.6,"tint":[24,21,14],"short":"Natchez Trace Parkway, Mississippi","place":"Cypress swamp, Natchez Trace Parkway, Mississippi","credit":"National Park Service"},{"id":"mallards","w":800,"h":1066,"fy":0.3,"k":0.54,"tint":[23,18,15],"short":"Cache River refuge, Arkansas","place":"Mallards at Cache River National Wildlife Refuge, Arkansas","credit":"R. Crossett, USFWS"},{"id":"woodpecker","w":718,"h":958,"fy":0.4,"k":0.5,"tint":[20,21,17],"short":"Red-cockaded woodpecker","place":"Red-cockaded woodpecker","credit":"USFWS"},{"id":"reef","w":810,"h":1080,"fy":0.6,"k":0.6,"tint":[17,19,21],"short":"Gray's Reef, Georgia","place":"Gray's Reef National Marine Sanctuary, Georgia","credit":"Greg McFall, NOAA"},{"id":"xdf","w":810,"h":1080,"fy":0.5,"k":0.4,"tint":[19,19,19],"short":"Hubble eXtreme Deep Field","place":"Hubble eXtreme Deep Field","credit":"NASA, ESA and the HUDF09 Team"}];      // photographs: {id,w,h,fy,k,tint,short,place,credit}
+var PICMAP=[[34,0,25,4,11],[4,14,26,33,6],[28,15,19,29,18],[25,29,16,0,7],[30,29,16,7,26],[10,28,0,30,29],[1,18,9,4,8],[1,4,18,8,15],[4,1,8,18,15],[2,12,17,24],[30,11,8,31],[14,15,20,4],[1,18,15,27],[11,34,26,27,20],[4,0,20,11,8],[7,31,17,19],[28,4,0,12,25],[9,8,30,0,10],[30,8,11,0,20],[34,4,11,18,10],[29,15,30,14,20],[10,28,0,30,18],[28,29,30,0,18],[29,26,15,32,18],[27,6,17,13,0],[1,23,4,18,15],[29,16,7,25,0],[17,2,28,26,6],[29,26,15,18,1],[7,10,19,16,0],[34,25,4,0,14],[28,11,4,20,8],[30,8,11,10,19],[4,14,15,20,12],[26,33,17,27,31],[30,11,8,3],[2,15,9,7,28],[5,16,13,25,7],[11,30,8,21],[3,22,24,31,17],[32,17,30,27,26],[22,3,1,21],[7,31,17,19,34],[22,3,24,31,32],[19,10,16,15,18],[15,2,25,9,21],[8,11,30,13],[34,28,10,26,17],[16,29,7,25,13],[13,19,31,2,21],[31,3,4,17,9],[1,9,4,32,15],[15,2,28,9,32],[15,29,10,16,25],[34,4,11,25,12],[9,30,1,21,13],[28,30,0,5,32],[28,29,30,8,6],[17,2,26,6,5],[10,18,1,21,11],[24,12,21,27],[30,28,13,12],[15,2,9,7,28],[8,11,30,12],[23,1,18,21,32],[18,21,31,11,9],[16,27,29,0,20],[26,6,17,27,21],[10,0,30,11,20],[28,10,0,18,20],[27,3,19,24],[27,32,3,31,29],[30,28,11,14],[29,5,16,7,26],[12,25,14,0,4],[3,24,31,13],[24,31,3,14],[25,12,0,33,14],[29,26,15,5,32],[10,28,15,21],[34,19,4,13],[34,28,18,6,20],[22,24,3,31],[11,30,19,16,13],[15,10,29,20],[34,28,0,20,18],[10,28,30,0,19],[0,25,12,34,14],[4,25,31,21],[33,23,24,9],[29,15,26,18,1],[24,3,31,6,26],[30,11,8,2],[29,16,7,25,12],[10,15,28,24,31],[15,1,18,0,25],[29,34,28,13],[25,12,31,1,0],[32,27,26,5,17],[12,14,21,9,25],[19,0,10,28,30],[10,28,15,16,13],[28,10,18,1,15],[2,4,28,14],[24,3,31,20],[34,33,25,4,23],[17,28,2,6,14],[16,7,13,20,4],[18,30,1,21,9],[32,16,5,13,18],[21,9,8,1,18],[17,26,28,6,5],[26,17,18,16,7],[28,10,30,18,1],[17,9,13,21,16],[19,13,31,7,17],[28,2,17,20],[3,31,24,14],[26,17,9,14],[27,31,24,3,32],[16,29,7,27,20],[27,7,17,13,31],[4,1,18,5,9],[12,14,20,2],[20,0,11,31,4],[17,26,27,32],[11,8,18,9,1],[18,1,21,9,8],[30,8,2,14],[21,2,15,14],[29,34,30,19],[19,13,21,7,31],[34,1,4,25],[18,21,1,31,11],[30,32,28,5,27],[13,7,16,14,12],[3,2,14,20],[12,14,25,0,4],[32,23,27,26,16],[28,7,19,5,14],[2,28,17,24],[5,32,28,20],[0,20,11,31,4],[34,0,10,20,11],[30,10,28,5,9],[28,29,0,15,1]];  // for each passage, the pictures that suit it, best first
+var CIDX=["chglkj","chgk","chgkj","chglkj","chglk","chglkj","chglkj","chglkj","chgkj","chglkj","hglk","hglkj","hglj","h","hglkj","hglkj","hglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglk","chglk","chglkj","chglkj","chglkj","chgk","chglkj","chglk","chgl","chglkj","chglkj","chglk","hglkj","hglkj","hglk","hgk","hglkj","hglkj","hglk","hglkj","hglkj","hglkj","hlj","chgkj","chglkj","chglkj","chgk","chglkj","chglkj","chgj","chglkj","chglkj","chglkj","chglkj","chglk","hglj","chglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglkj","chglj","chglj","chglj","hglj","chglj","chglj","chglj","chglj","chgl","chglj","chglj","hgj","chglj","chglj","hg","chglj","chgl","chglj","chglj","chglj","chglj","chglj","hglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","cglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","chglj","hglj","hglj","hglj"];      // for each passage, which commentators have a note on it
+var TRS={bsb:{abbr:'BSB',name:'Berean Standard Bible'},kjv:{abbr:'KJV',name:'King James Version'}};
+/* the commentators, oldest first. `key` is the name used in the data files. */
+var WHO=[
+  {id:'c',key:'calvin',chip:'Calvin',when:'1550s',name:'John Calvin',life:'1509–1564',about:'Reformer in Geneva. From his Commentaries, in the nineteenth-century English translation.'},
+  {id:'h',key:'henry',chip:'Matthew Henry',when:'1710',name:'Matthew Henry',life:'1662–1714',about:'English Presbyterian minister. From his Exposition of the Old and New Testaments; Romans to Revelation were finished by colleagues after his death.'},
+  {id:'g',key:'gill',chip:'Gill',when:'1750s',name:'John Gill',life:'1697–1771',about:'English Baptist pastor. From his Exposition of the Old and New Testaments.'},
+  {id:'l',key:'clarke',chip:'Clarke',when:'1820s',name:'Adam Clarke',life:'died 1832',about:'British Methodist scholar. From his Commentary on the Bible.'},
+  {id:'k',key:'kd',chip:'Keil & Delitzsch',when:'1860s',name:'Keil & Delitzsch',life:'1861–75',about:'C. F. Keil and Franz Delitzsch, German Lutheran scholars of Hebrew. From their Commentary on the Old Testament, in English translation.'},
+  {id:'j',key:'jfb',chip:'Jamieson, Fausset & Brown',when:'1871',name:'Jamieson, Fausset & Brown',life:'1871',about:'Three ministers in Scotland and England. From their Commentary, Critical and Explanatory, on the Whole Bible.'}
+];
+var POETRY={17:1,18:1,19:1,21:1,24:1}; // Job, Psalms, Proverbs, Song of Solomon, Lamentations
+
+function $(s,r){return (r||document).querySelector(s);}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function pad2(n){return (n<10?'0':'')+n;}
+var reduce=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+var store={
+  get:function(k,d){try{var v=localStorage.getItem('sower.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem('sower.'+k,JSON.stringify(v));}catch(e){}}
+};
+var IC={
+  notes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5.5h14V16h-8.5L6.5 19.6V16H5z"/><path d="M8.5 9.3h7M8.5 12.4h4.5"/></svg>',
+  chapter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6.6c-2-1.3-4.5-1.6-7.5-1v12c3-.6 5.5-.3 7.5 1 2-1.3 4.5-1.6 7.5-1v-12c-3-.6-5.5-.3-7.5 1z"/><path d="M12 6.6v12"/></svg>',
+  save:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5h10v15l-5-3.8-5 3.8z"/></svg>',
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 14.5v-10"/><path d="M8.2 8 12 4.3 15.8 8"/><path d="M6 11.5V19h12v-7.5"/></svg>',
+  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 14.5 12 9l5.5 5.5"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg>',
+  swap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.5 9A7 7 0 0 0 6 7.6L4.5 9.5"/><path d="M4.5 5.5v4h4"/><path d="M5.5 15A7 7 0 0 0 18 16.4l1.5-1.9"/><path d="M19.5 18.5v-4h-4"/></svg>'
+};
+
+/* ---------- references ---------- */
+function bookName(b){return b===18?'Psalm':BOOKS[b];}
+function refText(b,c,v,e){
+  var r=CHAPS[b]===1?bookName(b)+' '+v:bookName(b)+' '+c+':'+v;
+  if(e&&e!==v)r+='–'+e;
+  return r;
+}
+function chapText(b,c){return CHAPS[b]===1?BOOKS[b]:bookName(b)+' '+c;}
+function pid(p){return p.b+'.'+p.c+'.'+p.v+'.'+p.e;}
+function excerpt(t,n){if(t.length<=n)return t;var s=t.slice(0,n);var k=s.lastIndexOf(' ');return (k>40?s.slice(0,k):s).replace(/[,;:—\s]+$/,'')+'…';}
+
+/* ---------- state ---------- */
+var S={tr:store.get('tr','bsb'),saved:{},hint:store.get('hint',0),shape:store.get('shape','post'),bg:store.get('bg','pic')};
+if(!TRS[S.tr])S.tr='bsb';
+(store.get('saved',[])||[]).forEach(function(k){S.saved[k]=1;});
+function persistSaved(){store.set('saved',Object.keys(S.saved));}
+
+/* ---------- seeded scatter: every passage gets its own throw of seed ---------- */
+function hash(str){var h=2166136261>>>0;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){var a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function seeds(key){
+  var r=rng(hash(key)),n=46+Math.floor(r()*30),out=[],carry=.9+r()*.25;
+  for(var i=0;i<n;i++){
+    var phi=(8+r()*64)*Math.PI/180;            // fan of the throw, measured below the horizontal
+    var d=(.1+Math.pow(r(),.75)*.86)*carry;      // most seed lands near the hand, some carries far
+    var x=1.04-Math.cos(phi)*d+(r()-.5)*.05,y=-.03+Math.sin(phi)*d+(r()-.5)*.05;
+    var s=.0055+r()*.0085,a=-phi*180/Math.PI+(r()-.5)*70,o=.28+r()*.62;
+    if(x<.03||x>.985||y<.02||y>.66)continue;
+    out.push({x:x,y:y,s:s,a:a,o:o});
+  }
+  return out;
+}
+function seedsSVG(key){
+  var h='<svg class="seeds" viewBox="0 0 1000 1000" aria-hidden="true" focusable="false">';
+  seeds(key).forEach(function(s){
+    var cx=(s.x*1000).toFixed(1),cy=(s.y*1000).toFixed(1);
+    h+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(s.s*1000).toFixed(1)+'" ry="'+(s.s*550).toFixed(1)+'" transform="rotate('+s.a.toFixed(1)+' '+cx+' '+cy+')" fill="currentColor" opacity="'+s.o.toFixed(2)+'"/>';
+  });
+  return h+'</svg>';
+}
+var rootStyle=getComputedStyle(document.documentElement);
+var PLOTS=['soil','wheat','field','sky','clay','night'].map(function(id){
+  return {id:id,g:rootStyle.getPropertyValue('--'+id+'-g').trim(),t:rootStyle.getPropertyValue('--'+id+'-t').trim(),d:rootStyle.getPropertyValue('--'+id+'-d').trim()};
+});
+function plotById(id){for(var i=0;i<PLOTS.length;i++)if(PLOTS[i].id===id)return PLOTS[i];return PLOTS[0];}
+
+/* ---------- feed ---------- */
+var app=$('#app'),feedEl=$('#feed'),readerEl=$('#reader');
+var cards=[],active=0,bag=[],recent=[],lastBook=-1,plotBag=[],lastPlot='';
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function refill(){
+  var seen={};(store.get('seen',[])||[]).forEach(function(k){seen[k]=1;});
+  var ids=[];P.forEach(function(p,i){if(!seen[pid(p)])ids.push(i);});
+  if(ids.length<6){store.set('seen',[]);ids=P.map(function(_,i){return i;});}
+  bag=shuffle(ids);
+}
+function draw(){
+  if(!bag.length)refill();
+  var k=-1;
+  for(var i=0;i<bag.length;i++){if(P[bag[i]].b!==lastBook&&recent.indexOf(bag[i])<0){k=i;break;}}
+  if(k<0)k=0;
+  var id=bag.splice(k,1)[0];
+  lastBook=P[id].b;recent.push(id);if(recent.length>14)recent.shift();
+  return id;
+}
+function nextPlot(){
+  if(!plotBag.length){plotBag=shuffle(PLOTS.slice());if(plotBag[plotBag.length-1].id===lastPlot)plotBag.unshift(plotBag.pop());}
+  var pl=plotBag.pop();lastPlot=pl.id;return pl;
+}
+/* pictures: the best match for the passage unless it was on screen a moment ago */
+var picRecent=[],picBlobs={};
+function picURL(pic){return 'p/'+pic.id+'.jpg';}
+function picsFor(i){return (PICMAP[i]||[]).map(function(j){return PICS[j];}).filter(Boolean);}
+function nextPic(i){
+  if(!PICS.length)return null;
+  var len=P[i].t.bsb.length;
+  function fits(pc){return picRecent.indexOf(pc.id)<0&&!(pc.max&&len>pc.max);}   // some pictures only suit a short verse: longer words would cover the subject
+  var fresh=picsFor(i).filter(fits),pic;
+  if(fresh.length){var r=Math.random();pic=fresh[r<.62||fresh.length<2?0:r<.88||fresh.length<3?1:2];}
+  else{
+    var rest=PICS.filter(fits);
+    pic=rest.length?rest[Math.floor(Math.random()*rest.length)]:PICS[Math.floor(Math.random()*PICS.length)];
+  }
+  picRecent.push(pic.id);if(picRecent.length>9)picRecent.shift();
+  return pic;
+}
+function picBlobURL(pic){   // the same file fetched as data, for drawing share images and as a second way to show it
+  if(!picBlobs[pic.id]){
+    picBlobs[pic.id]=fetch(picURL(pic)).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+      .then(function(b){return URL.createObjectURL(b);},function(e){delete picBlobs[pic.id];throw e;});
+  }
+  return picBlobs[pic.id];
+}
+function paintCard(c){
+  if(c.pic){c.el.className='card pic'+(c.pic.up?' up':'');c.el.style.setProperty('--g','rgb('+c.pic.tint.join(',')+')');}
+  else{c.el.className='card plot-'+c.plot.id;c.el.style.removeProperty('--g');}
+}
+function dropPic(c){c.pic=null;paintCard(c);if(c.on){c.on=false;hydrate(c);}}
+function wirePic(c){
+  var im=$('.ph',c.el);if(!im)return;
+  function ok(){im.classList.add('in');}
+  function bad(){
+    if(im.dataset.again){dropPic(c);return;}
+    im.dataset.again='1';
+    picBlobURL(c.pic).then(function(u){if(im.isConnected)im.src=u;},function(){if(im.isConnected)dropPic(c);});
+  }
+  im.addEventListener('load',ok);im.addEventListener('error',bad);
+  if(im.complete){if(im.naturalWidth)ok();else if(im.currentSrc)bad();}
+}
+function cardHTML(c){
+  var p=P[c.i],ref=refText(p.b,p.c,p.v,p.e),on=!!S.saved[pid(p)];
+  var lift='';
+  if(c.pic&&c.pic.dy){   // the picture is moved up (or down) a little and melts into the card's own dark tone at the freed edge
+    var mk=c.pic.dy>0?'linear-gradient(#000 80%,transparent)':'linear-gradient(transparent,#000 20%)';
+    lift=' style="top:'+pct(-c.pic.dy)+';-webkit-mask-image:'+mk+';mask-image:'+mk+'"';
+  }
+  return (c.pic?'<img class="ph" alt="" decoding="async" draggable="false" src="'+picURL(c.pic)+'"'+lift+'><div class="shade"></div>':seedsSVG(pid(p)))+
+    '<div class="card-body">'+
+      '<div class="verse-box"><p class="verse">'+esc(p.t[S.tr])+'</p></div>'+
+      '<p class="ref"><span>'+esc(ref)+'</span><span class="ref-tr">'+TRS[S.tr].abbr+'</span><span class="mark" aria-hidden="true">'+NAME.toLowerCase()+'</span></p>'+
+      '<div class="acts">'+
+        '<button type="button" data-act="notes" aria-label="Context for '+esc(ref)+'">'+IC.notes+'<span>Context</span></button>'+
+        '<button type="button" data-act="chapter" aria-label="Read '+esc(chapText(p.b,p.c))+'">'+IC.chapter+'<span>Chapter</span></button>'+
+        '<button type="button" data-act="save" aria-pressed="'+on+'" aria-label="Save '+esc(ref)+'">'+IC.save+'<span>'+(on?'Saved':'Save')+'</span></button>'+
+        '<button type="button" data-act="share" aria-label="Make an image of '+esc(ref)+'">'+IC.share+'<span>Share</span></button>'+
+      '</div>'+
+      (c.hint?'<p class="hint">'+IC.up+'Swipe up for another verse</p>':'')+
+      (c.pic?'<p class="cap">'+esc(c.pic.short)+' · '+esc(c.pic.credit)+'</p>':'')+
+    '</div>';
+}
+function pct(x){return (x*100).toFixed(1)+'%';}
+function shadeCSS(pic,tt){   // words low: tt is where they begin, as a share of the height
+  var T=pic.tint.join(' '),s1=Math.max(.03,tt-.05),s0=Math.max(0,s1-.24),m=Math.min(.12,s0);
+  return 'linear-gradient(180deg,rgb('+T+'/.28) 0,rgb('+T+'/.05) '+pct(m)+',rgb('+T+'/.05) '+pct(s0)+',rgb('+T+'/'+pic.k+') '+pct(s1)+',rgb('+T+'/'+Math.min(.92,Math.max(.72,pic.k+.2)).toFixed(2)+') 100%)';
+}
+function shadeUpCSS(pic,tb,at){   // words high: tb is where they end, at where the buttons begin; the picture shows between
+  var T=pic.tint.join(' '),a=pic.k,e1=Math.min(.97,tb+.03),b1=Math.max(e1,at-.01),gap=b1-e1;
+  var t=Math.max(0,Math.min(1,(gap-.1)/.2)),mid=(a-(a-.05)*t).toFixed(2);   // with little room left, stay dark right through
+  return 'linear-gradient(180deg,rgb('+T+'/'+Math.min(.92,a+.08).toFixed(2)+') 0,rgb('+T+'/'+a+') '+pct(e1)+',rgb('+T+'/'+mid+') '+pct(e1+Math.min(.2,gap*.45))+
+    ',rgb('+T+'/'+mid+') '+pct(b1-Math.min(.16,gap*.4))+',rgb('+T+'/.66) '+pct(b1)+',rgb('+T+'/.88) 100%)';
+}
+function fit(c){
+  var v=$('.verse',c.el),box=$('.verse-box',c.el);if(!v||!box)return;
+  var w=c.el.clientWidth||360,hh=c.el.clientHeight||740,n=v.textContent.length;
+  var k=Math.max(.9,Math.min(1.3,w/360))*Math.max(1,Math.min(1.14,hh/760));
+  var s=(n<=14?66:n<=45?46:n<=80?38:n<=130?32:n<=190?27:n<=260?24:21.5)*k,guard=0;
+  function apply(){v.style.fontSize=s+'px';v.style.lineHeight=s>=38?'1.14':s>=27?'1.22':'1.3';}
+  apply();
+  while(v.offsetHeight>box.clientHeight+1&&s>14&&guard++<70){s-=1;apply();}
+  var top=v.getBoundingClientRect().top-c.el.getBoundingClientRect().top-10,sd=c.el.querySelectorAll('.seeds ellipse');
+  for(var i=0;i<sd.length;i++)sd[i].style.display=(+sd[i].getAttribute('cy'))/1000*w>top?'none':'';
+  var sh=c.pic&&$('.shade',c.el);
+  if(sh){
+    var R=c.el.getBoundingClientRect().top;
+    sh.style.background=c.pic.up?shadeUpCSS(c.pic,($('.ref',c.el).getBoundingClientRect().bottom-R)/hh,($('.acts',c.el).getBoundingClientRect().top-R)/hh):shadeCSS(c.pic,(top+10)/hh);
+  }
+}
+function hydrate(c){if(c.on)return;c.on=true;c.el.innerHTML=cardHTML(c);fit(c);wirePic(c);}
+function dehydrate(c){if(!c.on)return;c.on=false;c.el.innerHTML='';}
+function makeCard(id){
+  var c={el:document.createElement('article'),i:id,plot:nextPlot(),pic:nextPic(id),on:false,hint:false};
+  paintCard(c);
+  var p=P[id];c.el.setAttribute('aria-label',refText(p.b,p.c,p.v,p.e));
+  return c;
+}
+function addCard(){
+  var c=makeCard(draw());
+  c.hint=!cards.length&&!S.hint;
+  c.el.dataset.i=cards.length;cards.push(c);feedEl.appendChild(c.el);io.observe(c.el);
+  return c;
+}
+function reindex(){cards.forEach(function(c,i){c.el.dataset.i=i;});}
+function setActive(k){
+  active=k;
+  while(cards.length<k+4)addCard();
+  cards.forEach(function(c,i){if(i>=k-3&&i<=k+3)hydrate(c);else if(i<k-10||i>k+10)dehydrate(c);});
+  var key=pid(P[cards[k].i]),seen=store.get('seen',[])||[];
+  if(seen.indexOf(key)<0){seen.push(key);store.set('seen',seen);}
+  if(k>0&&!S.hint){S.hint=1;store.set('hint',1);var h=$('.hint',cards[0].el);if(h)h.remove();cards[0].hint=false;}
+}
+var io=new IntersectionObserver(function(es){
+  es.forEach(function(e){if(e.isIntersecting&&e.intersectionRatio>=.6)setActive(+e.target.dataset.i);});
+},{root:feedEl,threshold:[.6]});
+function go(k){
+  if(k<0)return;while(cards.length<=k)addCard();hydrate(cards[k]);
+  feedEl.scrollTo({top:cards[k].el.offsetTop,behavior:reduce?'auto':'smooth'});
+}
+function refitAll(){cards.forEach(function(c){if(c.on)fit(c);});}
+function rerenderCards(){cards.forEach(function(c){if(c.on){c.on=false;hydrate(c);}});}
+
+feedEl.addEventListener('click',function(e){
+  var el=e.target.closest('.card');if(!el)return;
+  var c=cards[+el.dataset.i];if(!c)return;var p=P[c.i];
+  var btn=e.target.closest('[data-act]');
+  if(btn){
+    var a=btn.dataset.act;
+    if(a==='notes')openNotes(p,c.plot,c.pic);
+    else if(a==='chapter')openReaderAt(p.b,p.c,{b:p.b,c:p.c,v:p.v,e:p.e});
+    else if(a==='share')openShare(p,c.plot,c.pic);
+    else if(a==='save'){
+      var key=pid(p);
+      if(S.saved[key]){delete S.saved[key];toast('Removed from saved.');}else{S.saved[key]=1;toast('Saved.');}
+      persistSaved();
+      cards.forEach(function(o){if(o.on&&o.i===c.i){var b=$('[data-act="save"]',o.el);if(b){b.setAttribute('aria-pressed',!!S.saved[key]);b.lastChild.textContent=S.saved[key]?'Saved':'Save';}}});
+    }
+    return;
+  }
+  if(e.target.closest('.verse-box'))openNotes(p,c.plot,c.pic);
+});
+
+/* ---------- toast ---------- */
+var toastEl=$('#toast'),toastT=0;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('show');},2400);}
+
+/* ---------- sheets ---------- */
+var sheet=$('#sheet'),scrim=$('#scrim'),sheetBody=$('#sheetBody'),sheetKind='',sheetBack=null,sheetT=0;
+function openSheet(kind,html,label){
+  clearTimeout(sheetT);
+  if(!sheetKind)sheetBack=document.activeElement;
+  sheetKind=kind;sheetBody.innerHTML=html;sheetBody.scrollTop=0;
+  sheet.setAttribute('aria-label',label||'Details');
+  sheet.hidden=false;scrim.hidden=false;
+  void sheet.offsetWidth;sheet.classList.add('open');
+  try{$('#sheetClose').focus({preventScroll:true});}catch(e){}
+}
+function closeSheet(){
+  if(!sheetKind)return;
+  sheetKind='';sheet.classList.remove('open');scrim.hidden=true;sheet._cm=null;
+  if(share&&share.url){URL.revokeObjectURL(share.url);}share=null;
+  sheetT=setTimeout(function(){sheet.hidden=true;sheetBody.innerHTML='';},reduce?0:230);
+  try{if(sheetBack&&sheetBack.focus)sheetBack.focus({preventScroll:true});}catch(e){}
+}
+$('#sheetClose').addEventListener('click',closeSheet);
+scrim.addEventListener('click',closeSheet);
+
+function openNotes(p,plot,pic){
+  var ref=refText(p.b,p.c,p.v,p.e),marks=CIDX[P.indexOf(p)]||'';
+  var who=WHO.filter(function(w){return marks.indexOf(w.id)>=0;}),deep='';
+  if(who.length){
+    deep='<h3 class="lab" id="deepLab">Go deeper</h3>'+
+      '<p class="fine tight">'+(who.length>1?'Older commentators':'An older commentator')+' on this passage, in their own words.</p>'+
+      '<div class="who">'+who.map(function(w){
+        return '<button type="button" data-cm="'+w.id+'" aria-expanded="false" aria-controls="cmOut">'+esc(w.chip)+'<span>'+w.when+'</span></button>';
+      }).join('')+'</div><div id="cmOut" aria-live="polite"></div>';
+  }
+  openSheet('notes',
+    '<p class="eyebrow">'+esc(ref)+' <span class="dim">'+TRS[S.tr].abbr+'</span></p>'+
+    '<p class="quote">'+esc(p.t[S.tr])+'</p>'+
+    '<h3 class="lab">Setting</h3><p class="note">'+esc(p.s)+'</p>'+
+    '<h3 class="lab">In context</h3><p class="note">'+esc(p.m)+'</p>'+
+    '<p class="fine tight">These two notes are AI-written drafts for this prototype. No pastor or scholar has reviewed them.</p>'+
+    deep+
+    '<div class="row"><button type="button" class="btn primary" data-n="chapter">'+IC.chapter+'Read '+esc(chapText(p.b,p.c))+'</button>'+
+    '<button type="button" class="btn" data-n="share">'+IC.share+'Make image</button></div>',
+    'Context for '+ref);
+  sheet._p=p;sheet._plot=plot;sheet._pic=pic;
+}
+
+/* ---------- the older commentators ---------- */
+var cmP={};
+function loadCm(p){
+  var key=pid(p);
+  if(!cmP[key]){
+    cmP[key]=fetch('c/'+key+'.json').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(null,function(e){delete cmP[key];throw e;});
+  }
+  return cmP[key];
+}
+function lemma(q){   // the words of the verse a comment hangs on, closed like a short heading
+  q=q.replace(/[\s,;:—–-]+$/,'');
+  return /[.!?…][’”"')\]]*$/.test(q)?q:q+'.';
+}
+function cmHTML(w,d){
+  var h='<div class="cm"><p class="cm-name">'+esc(w.name)+'<span>'+w.life+'</span></p><p class="cm-about">'+esc(w.about)+'</p>';
+  if(d.on)h+='<p class="cm-on">On verses '+esc(d.on)+', taken together</p>';
+  if(d.note)h+='<p class="fine tight">'+esc(d.note)+'</p>';
+  h+='<div class="cm-text clamp" id="cmText">';
+  var tr=false;
+  (d.p||[]).forEach(function(par){
+    if(typeof par==='string'){h+=par==='…'?'<p class="gap">… <span>part of the note is left out here</span> …</p>':'<p>'+esc(par)+'</p>';return;}
+    if(!par[1]){h+='<p class="tr">'+(tr?'':'<span class="trl">Their own translation</span>')+esc(par[0])+'</p>';tr=true;return;}
+    var on=/^[a-z(]/.test(par[1]);   // his sentence runs on from the quoted words: "the glory of God — is the sum of His perfections"
+    h+='<p><span class="q">'+esc(on?par[0].replace(/[\s,;:—–-]+$/,''):lemma(par[0]))+'</span>'+(on?' — ':' ')+esc(par[1])+'</p>';
+  });
+  return h+'</div><button type="button" class="cm-more" data-more="1" hidden>Keep reading</button>'+
+    '<p class="fine">'+(d.cut?'Shortened here: the full note runs longer. ':'')+'Public-domain text. A script chose this excerpt and it was only spot-checked, so it can begin or end abruptly.</p></div>';
+}
+function toggleCm(btn){
+  var out=$('#cmOut'),p=sheet._p,was=btn.getAttribute('aria-expanded')==='true',bs=sheetBody.querySelectorAll('[data-cm]');
+  for(var i=0;i<bs.length;i++)bs[i].setAttribute('aria-expanded','false');
+  var tok=sheet._cm={};
+  if(was){out.innerHTML='';return;}
+  btn.setAttribute('aria-expanded','true');
+  var w=WHO.filter(function(x){return x.id===btn.dataset.cm;})[0];
+  out.innerHTML='<p class="fine">Opening '+esc(w.name)+'…</p>';
+  loadCm(p).then(function(data){
+    if(sheet._cm!==tok)return;
+    var d=data[w.key];
+    if(!d){out.innerHTML='<p class="fine">Nothing from '+esc(w.name)+' on this passage.</p>';return;}
+    out.innerHTML=cmHTML(w,d);
+    var tx=$('#cmText'),more=$('.cm-more',out);
+    if(tx.scrollHeight>tx.clientHeight+150)more.hidden=false;else tx.classList.remove('clamp');   // a short note is simply shown whole
+    var lab=$('#deepLab');
+    if(lab)sheetBody.scrollTo({top:sheetBody.scrollTop+lab.getBoundingClientRect().top-sheetBody.getBoundingClientRect().top-6,behavior:reduce?'auto':'smooth'});
+  },function(){
+    if(sheet._cm!==tok)return;
+    btn.setAttribute('aria-expanded','false');
+    out.innerHTML='<p class="fine">That note did not load. Check your connection and tap the name again.</p>';
+  });
+}
+
+/* ---------- share image ---------- */
+var share=null,shareTok=0,downloads=null,nativeOK=true,fontsP=null;
+try{
+  if(window.claude&&typeof window.claude.use==='function'){
+    window.claude.use('downloads').then(function(ns){downloads=ns||null;updateShareButtons();},function(){});
+  }else if(STANDALONE){
+    // on its own the page can hand the picture to the browser as an ordinary download
+    downloads={plain:true,save:function(o){
+      return new Promise(function(res,rej){
+        try{
+          var u=URL.createObjectURL(o.data),a=document.createElement('a');
+          a.href=u;a.download=o.filename;a.rel='noopener';a.style.display='none';
+          document.body.appendChild(a);a.click();a.remove();
+          setTimeout(function(){URL.revokeObjectURL(u);},60000);
+          res({status:'saved'});
+        }catch(e){rej(e);}
+      });
+    }};
+  }
+}catch(e){}
+function fontsReady(){
+  if(!fontsP){
+    var want=['600 64px Vollkorn','italic 600 44px Vollkorn','600 36px "Barlow Semi Condensed"','500 36px "Barlow Semi Condensed"'];
+    var load=document.fonts&&document.fonts.load?Promise.all(want.map(function(f){return document.fonts.load(f).catch(function(){return null;});})):Promise.resolve();
+    fontsP=Promise.race([load,new Promise(function(r){setTimeout(r,1800);})]);
+  }
+  return fontsP;
+}
+function wrapLines(x,text,maxW){
+  var words=text.split(' '),lines=[],cur='';
+  words.forEach(function(w){var t=cur?cur+' '+w:w;if(!cur||x.measureText(t).width<=maxW)cur=t;else{lines.push(cur);cur=w;}});
+  if(cur)lines.push(cur);
+  return lines;
+}
+function loadImg(url){return new Promise(function(res,rej){var im=new Image();im.onload=function(){res(im);};im.onerror=function(){rej(new Error('image'));};im.src=url;});}
+function renderImage(p,tr,bg,shape){
+  var pic=bg.mode==='pic'?bg.pic:null,plot=bg.plot;
+  return Promise.all([fontsReady(),pic?picBlobURL(pic).then(loadImg):null]).then(function(got){
+    var img=got[1],ink=pic?'#fffdf6':plot.t,up=!!(pic&&pic.up);
+    var W=1080,H=shape==='square'?1080:shape==='story'?1920:1350;
+    var cv=document.createElement('canvas');cv.width=W;cv.height=H;var x=cv.getContext('2d');
+    x.fillStyle=pic?'rgb('+pic.tint.join(',')+')':plot.g;x.fillRect(0,0,W,H);
+    var padX=96,padTop=shape==='story'?300:120,padBot=shape==='story'?300:pic?112:96,drop=shape==='story'?150:0;
+    var SERIF='Vollkorn, Georgia, "Times New Roman", serif',LAB='"Barlow Semi Condensed", "Arial Narrow", sans-serif';
+    var text=p.t[tr],ref=refText(p.b,p.c,p.v,p.e).toUpperCase(),wm=NAME.toLowerCase();
+    // words low with the reference beneath them, or (for pictures marked `up`) words high so the subject below stays clear
+    var footH=up?250:150,boxW=W-padX*2,boxH=H-padTop-padBot-footH;
+    if(pic)boxH=Math.min(boxH,Math.round(H*(shape==='story'?(up?.4:.44):shape==='square'?(up?.42:.48):(up?.44:.5))));   // leave the photograph room to be seen
+    var lo=30,hi=text.length<=14?190:text.length<=60?132:104,best=lo,lines=null;
+    function lead(sz){return sz*(sz>=80?1.14:1.22);}
+    while(lo<=hi){
+      var mid=(lo+hi)>>1;x.font='600 '+mid+'px '+SERIF;
+      var L=wrapLines(x,text,boxW),wide=L.some(function(l){return x.measureText(l).width>boxW;});
+      if(!wide&&L.length*lead(mid)<=boxH){best=mid;lines=L;lo=mid+1;}else hi=mid-1;
+    }
+    x.font='600 '+best+'px '+SERIF;
+    if(!lines)lines=wrapLines(x,text,boxW);
+    var lh=lead(best),textTop=up?padTop:H-padBot-footH-lines.length*lh,y=textTop+best*.84;
+    var refY=up?textTop+lines.length*lh+58:H-padBot-28,lowY=H-padBot+22;   // baselines of the reference row and of the bottom row
+    if(img){
+      // the photograph fills the frame; where a squarer shape must trim it, pic.fy says which part to keep,
+      // and pic.dy lifts a low subject clear of the bottom row, the picture melting into its own dark tone below
+      var sc=Math.max(W/img.naturalWidth,H/img.naturalHeight),dw=img.naturalWidth*sc,dh=img.naturalHeight*sc;
+      var iy=(H-dh)*pic.fy-(pic.dy||0)*H,T=pic.tint.join(','),g;
+      x.imageSmoothingEnabled=true;try{x.imageSmoothingQuality='high';}catch(e){}
+      x.drawImage(img,(W-dw)/2,iy,dw,dh);
+      if(iy+dh<H-1){
+        g=x.createLinearGradient(0,iy+dh*.8,0,iy+dh);g.addColorStop(0,'rgba('+T+',0)');g.addColorStop(1,'rgba('+T+',1)');
+        x.fillStyle=g;x.fillRect(0,iy+dh*.8,W,dh*.2+2);
+      }
+      if(iy>1){
+        g=x.createLinearGradient(0,iy,0,iy+dh*.2);g.addColorStop(0,'rgba('+T+',1)');g.addColorStop(1,'rgba('+T+',0)');
+        x.fillStyle=g;x.fillRect(0,iy-2,W,dh*.2+2);
+      }
+      g=x.createLinearGradient(0,0,0,H);
+      function stop(at,al){g.addColorStop(Math.max(0,Math.min(1,at)),'rgba('+T+','+Math.max(0,Math.min(.94,al)).toFixed(2)+')');}
+      if(up){
+        var e1=Math.min(.97,(refY+34)/H),b1=Math.max(e1,(lowY-92)/H),gap=b1-e1,tm=Math.max(0,Math.min(1,(gap-.1)/.2)),ml=pic.k-(pic.k-.04)*tm;
+        stop(0,pic.k+.08);stop(e1,pic.k);stop(e1+Math.min(.2,gap*.45),ml);stop(b1-Math.min(.16,gap*.4),ml);stop(b1,.6);stop(1,.84);
+      }else{
+        var s1=Math.max(.03,textTop/H-.05),s0=Math.max(0,s1-.24);
+        stop(0,.22);stop(Math.min(.1,s0),.04);stop(s0,.04);stop(s1,pic.k);stop(1,Math.max(.72,pic.k+.2));
+      }
+      x.fillStyle=g;x.fillRect(0,0,W,H);
+      x.shadowColor='rgba(0,0,0,.42)';x.shadowBlur=20;x.shadowOffsetY=2;
+    }else{
+      x.fillStyle=plot.d;
+      seeds(pid(p)).forEach(function(s){
+        var sy=s.y*W+drop;if(sy+s.s*W>textTop-18)return;
+        x.save();x.globalAlpha=s.o;x.translate(s.x*W,sy);x.rotate(s.a*Math.PI/180);
+        x.beginPath();x.ellipse(0,0,s.s*W,s.s*W*.55,0,0,Math.PI*2);x.fill();x.restore();
+      });
+    }
+    x.globalAlpha=1;
+    x.fillStyle=ink;x.textBaseline='alphabetic';
+    lines.forEach(function(l){x.fillText(l,padX,y);y+=lh;});
+    if(img){x.shadowBlur=8;x.shadowOffsetY=1;}
+    x.font='600 36px '+LAB;try{x.letterSpacing='3.5px';}catch(e){}
+    x.globalAlpha=.94;x.fillText(ref,padX,refY);var rw=x.measureText(ref).width;
+    x.font='500 36px '+LAB;x.globalAlpha=pic?.78:.66;x.fillText(TRS[tr].abbr,padX+rw+24,refY);
+    try{x.letterSpacing='0px';}catch(e){}
+    x.font='italic 600 42px '+SERIF;x.globalAlpha=pic?.86:.78;
+    var wmW=x.measureText(wm).width;x.fillText(wm,W-padX-wmW,up?lowY:refY);
+    if(pic){   // every picture keeps its credit when it travels
+      var cr='Photo: '+pic.credit+' · '+pic.short,cs=25,room=W-padX*2-(up?wmW+40:0);
+      try{x.letterSpacing='.6px';}catch(e){}
+      do{x.font='500 '+cs+'px '+LAB;}while(x.measureText(cr).width>room&&--cs>16);
+      x.globalAlpha=.82;x.fillText(cr,padX,lowY);
+      try{x.letterSpacing='0px';}catch(e){}
+    }
+    x.globalAlpha=1;x.shadowColor='transparent';
+    // a photograph saves far smaller as JPEG; flat colour stays crisp as PNG
+    return new Promise(function(res){if(pic)cv.toBlob(res,'image/jpeg',.9);else cv.toBlob(res,'image/png');});
+  });
+}
+function fileName(p,blob){return NAME.toLowerCase()+'-'+refText(p.b,p.c,p.v,p.e).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+(blob&&blob.type==='image/jpeg'?'.jpg':'.png');}
+function caption(p){return p.t[S.tr]+'\n— '+refText(p.b,p.c,p.v,p.e)+' ('+TRS[S.tr].abbr+')';}
+function canNative(file){try{return !!(navigator.canShare&&navigator.share&&navigator.canShare({files:[file]}));}catch(e){return false;}}
+function shareHTML(){
+  var p=share.p,ref=refText(p.b,p.c,p.v,p.e);
+  var shapes=[['post','Post 4:5'],['square','Square'],['story','Story']];
+  return '<p class="eyebrow">'+esc(ref)+' <span class="dim">'+TRS[S.tr].abbr+'</span></p>'+
+    '<div class="preview"><p class="fine" id="pvWait">Drawing the image…</p><img id="pvImg" alt="" hidden></div>'+
+    '<div class="opts"><div class="seg2" role="radiogroup" aria-label="Image shape">'+
+      shapes.map(function(s){return '<button type="button" role="radio" data-shape="'+s[0]+'" aria-checked="'+(s[0]===share.shape)+'">'+s[1]+'</button>';}).join('')+
+    '</div></div><div class="bgrow">'+(share.pics.length?'<div class="seg2" role="radiogroup" aria-label="Background">'+
+      '<button type="button" role="radio" data-bg="pic" aria-checked="'+(share.mode==='pic')+'">Picture</button>'+
+      '<button type="button" role="radio" data-bg="plot" aria-checked="'+(share.mode==='plot')+'">Color</button></div>':'')+
+    '<span class="bgmore" id="bgRow">'+bgRowHTML()+'</span></div>'+
+    '<div class="row"><button type="button" class="btn primary" id="doShare" hidden>'+IC.share+'Share</button>'+
+    '<button type="button" class="btn" id="doSave" hidden>Save image</button>'+
+    '<button type="button" class="btn" id="doCopy">Copy text</button></div>'+
+    '<textarea class="copybox" id="copyBox" rows="4" readonly hidden aria-label="Verse text"></textarea>'+
+    '<p class="fine" id="shareHelp"></p>';
+}
+function bgRowHTML(){
+  if(share.mode==='pic'){
+    var pc=share.pics[share.pi];
+    return '<button type="button" class="mini" data-bg="next" aria-label="Another picture">'+IC.swap+'Another</button>'+
+      '<span class="bgcap">'+esc(pc.place)+'. Photo: '+esc(pc.credit)+'.</span>';
+  }
+  return '<div class="sw" role="radiogroup" aria-label="Background color">'+
+    PLOTS.map(function(pl){return '<button type="button" role="radio" class="plot-'+pl.id+'" data-plot="'+pl.id+'" aria-checked="'+(pl.id===share.plot.id)+'" aria-label="'+pl.id+'"></button>';}).join('')+'</div>';
+}
+function openShare(p,plot,pic){
+  // pictures in order: the one on the card, the others that suit the passage, then the rest
+  var list=picsFor(P.indexOf(p)),rest=PICS.filter(function(pc){return list.indexOf(pc)<0;});
+  if(!list.length&&rest.length){var k=hash(pid(p))%rest.length;rest=rest.slice(k).concat(rest.slice(0,k));}
+  list=list.concat(rest);
+  if(pic&&list.indexOf(pic)>0){list.splice(list.indexOf(pic),1);list.unshift(pic);}
+  share={p:p,plot:plot||PLOTS[hash(pid(p))%PLOTS.length],pics:list,pi:0,mode:list.length&&S.bg!=='plot'?'pic':'plot',shape:S.shape,blob:null,url:null,file:null};
+  openSheet('share',shareHTML(),'Share image');
+  paintShare();
+}
+function syncShareControls(){
+  var row=$('#bgRow');if(row)row.innerHTML=bgRowHTML();
+  var rs=sheetBody.querySelectorAll('[role="radio"]');
+  for(var i=0;i<rs.length;i++){
+    var d=rs[i].dataset;
+    rs[i].setAttribute('aria-checked',d.shape?d.shape===share.shape:d.bg?d.bg===share.mode:d.plot===share.plot.id);
+  }
+}
+function paintShare(){
+  var s=share,tk=++shareTok,pc=s.mode==='pic'?s.pics[s.pi]:null;
+  renderImage(s.p,S.tr,{mode:s.mode,pic:pc,plot:s.plot},s.shape).then(function(blob){
+    if(tk!==shareTok||share!==s||!blob)return;
+    if(s.url)URL.revokeObjectURL(s.url);
+    s.blob=blob;s.url=URL.createObjectURL(blob);
+    try{s.file=new File([blob],fileName(s.p,blob),{type:blob.type||'image/png'});}catch(e){s.file=null;}
+    var img=$('#pvImg'),wait=$('#pvWait');if(!img)return;
+    img.src=s.url;img.alt='Image of '+refText(s.p.b,s.p.c,s.p.v,s.p.e)+(pc?' over a photograph: '+pc.place:' on a '+s.plot.id+' background');
+    img.hidden=false;if(wait)wait.hidden=true;
+    updateShareButtons();
+  }).catch(function(){
+    if(tk!==shareTok||share!==s)return;
+    if(s.mode==='pic'){   // the photograph would not load: fall back to a plain ground rather than leave nothing
+      s.mode='plot';syncShareControls();paintShare();toast('That picture did not load. Using a color instead.');return;
+    }
+    var w=$('#pvWait');if(w)w.textContent='The image could not be drawn. Copy the text instead.';
+  });
+}
+function updateShareButtons(){
+  var sb=$('#doShare'),sv=$('#doSave'),help=$('#shareHelp');if(!sb||!share)return;
+  var nat=!!(share.file&&nativeOK&&canNative(share.file)),plain=!!(downloads&&downloads.plain);
+  sb.hidden=!nat;sv.hidden=!downloads||(plain&&nat);   // where the share sheet works it already offers "Save Image"
+  sv.classList.toggle('primary',!nat);
+  help.textContent=nat?(plain?'Share opens your phone’s share sheet. Pick Instagram, Facebook or Messages, or Save Image to keep it in your photos.'
+      :'Share opens your phone’s share sheet. Pick Instagram, Facebook, Messages or anything else.')
+    :downloads?(plain?'Save puts the image in your downloads. You can also press and hold the preview.'
+      :'A saved image posts from your photos like any other picture. You can also press and hold the preview.')
+    :'Press and hold the preview to save or share it.';
+}
+function doSave(){
+  if(!share||!share.blob||!downloads)return;
+  var plain=!!downloads.plain;
+  downloads.save({filename:fileName(share.p,share.blob),data:share.blob}).then(function(){toast(plain?'Saved to your downloads.':'Saved. Post it from your photos.');},function(err){
+    var code=err&&err.code;
+    if(code==='declined')toast('Not saved.');
+    else if(code==='rate_limited')toast('Answer the save prompt that is already open.');
+    else{downloads=null;updateShareButtons();toast('Saving is not available here. Press and hold the image.');}
+  });
+}
+function doNative(){
+  if(!share||!share.file)return;
+  navigator.share({files:[share.file]}).catch(function(err){
+    if(err&&err.name==='AbortError')return;
+    nativeOK=false;updateShareButtons();toast('Sharing is blocked here. Save the image instead.');
+  });
+}
+function copyText(str,box){
+  function fallback(){
+    if(box){box.hidden=false;box.value=str;box.focus();box.select();toast('Copying is blocked here. The text is selected for you.');}
+    else toast('Copying is blocked here.');
+  }
+  try{navigator.clipboard.writeText(str).then(function(){toast('Copied.');},fallback);}catch(e){fallback();}
+}
+
+/* ---------- reading in order ---------- */
+var rscroll=$('#rscroll'),chaptersEl=$('#chapters'),moreEl=$('#more'),prevBtn=$('#prevCh'),pickLabel=$('#pickLabel'),selbar=$('#selbar');
+var bookP={},bookData={},rd={first:null,last:null,hl:null,busy:false,tok:0,cur:null,done:false},sel=null;
+function loadBook(tr,b){
+  var key=tr+':'+b;
+  if(!bookP[key]){
+    bookP[key]=fetch('t/'+tr+'/'+pad2(b+1)+'.json').then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+      .then(function(d){bookData[key]=d;return d;},function(e){delete bookP[key];throw e;});
+  }
+  return bookP[key];
+}
+function nextOf(b,c){return c<CHAPS[b]?{b:b,c:c+1}:b<65?{b:b+1,c:1}:null;}
+function prevOf(b,c){return c>1?{b:b,c:c-1}:b>0?{b:b-1,c:CHAPS[b-1]}:null;}
+function chapterEl(b,c,data){
+  var sec=document.createElement('section');sec.className='ch'+(POETRY[b]?' poetry':'');sec.dataset.b=b;sec.dataset.c=c;
+  var h='<h2 class="ch-h">'+esc(chapText(b,c))+'</h2>',sup=data.s&&data.s[c];
+  if(sup)h+='<p class="sup">'+esc(sup)+'</p>';
+  h+='<p class="vv">';
+  (data.c[c-1]||[]).forEach(function(t,i){
+    if(!t)return;
+    var v=i+1,hl=rd.hl&&rd.hl.b===b&&rd.hl.c===c&&v>=rd.hl.v&&v<=rd.hl.e;
+    h+='<span class="v'+(hl?' hl':'')+'" data-v="'+v+'"><sup>'+v+'</sup>'+esc(t)+' </span>';
+  });
+  sec.innerHTML=h+'</p>';
+  return sec;
+}
+function setCur(b,c){
+  if(rd.cur&&rd.cur.b===b&&rd.cur.c===c)return;
+  rd.cur={b:b,c:c};pickLabel.textContent=chapText(b,c);store.set('pos',{b:b,c:c});
+}
+function appendChapter(b,c,tk){
+  rd.busy=true;moreEl.textContent='Loading '+chapText(b,c)+'…';
+  return loadBook(S.tr,b).then(function(data){
+    if(tk!==rd.tok)return;
+    chaptersEl.appendChild(chapterEl(b,c,data));rd.last={b:b,c:c};rd.busy=false;
+    var n=nextOf(b,c);
+    if(!n){rd.done=true;moreEl.textContent='The end of Revelation.';}else moreEl.textContent='';
+  },function(){
+    if(tk!==rd.tok)return;
+    rd.busy=false;rd.failed={b:b,c:c};
+    moreEl.innerHTML='Could not load '+esc(chapText(b,c))+'. Check your connection.<button type="button" id="retry">Try again</button>';
+  });
+}
+function maybeMore(){
+  if(rd.busy||rd.done||rd.failed||!rd.last||app.dataset.view!=='read')return;
+  var gap=moreEl.getBoundingClientRect().top-rscroll.getBoundingClientRect().bottom;
+  if(gap<700){var n=nextOf(rd.last.b,rd.last.c);if(n){var tk=rd.tok;appendChapter(n.b,n.c,tk).then(function(){if(tk===rd.tok)maybeMore();});}}
+}
+function openChapter(b,c,hl){
+  var tk=++rd.tok;clearSel();
+  chaptersEl.innerHTML='';rd.first={b:b,c:c};rd.last=null;rd.hl=hl||null;rd.done=false;rd.failed=null;rd.cur=null;
+  setCur(b,c);rscroll.scrollTop=0;
+  var pv=prevOf(b,c);prevBtn.hidden=!pv;if(pv){prevBtn.innerHTML=IC.back+esc(chapText(pv.b,pv.c));prevBtn._to=pv;}
+  return appendChapter(b,c,tk).then(function(){
+    if(tk!==rd.tok)return;
+    var mark=hl&&$('.v.hl',chaptersEl);
+    if(mark)rscroll.scrollTop=Math.max(0,mark.offsetTop-rscroll.clientHeight*.38);
+    maybeMore();
+  });
+}
+function openReaderAt(b,c,hl){closeSheet();setView('read',true);openChapter(b,c,hl);}
+var rTick=0;
+rscroll.addEventListener('scroll',function(){
+  if(rTick)return;
+  rTick=requestAnimationFrame(function(){
+    rTick=0;
+    var top=rscroll.getBoundingClientRect().top+90,secs=chaptersEl.children,cur=null;
+    for(var i=0;i<secs.length;i++){if(secs[i].getBoundingClientRect().top<=top)cur=secs[i];else break;}
+    if(cur)setCur(+cur.dataset.b,+cur.dataset.c);
+    maybeMore();
+  });
+},{passive:true});
+prevBtn.addEventListener('click',function(){if(prevBtn._to)openChapter(prevBtn._to.b,prevBtn._to.c);});
+moreEl.addEventListener('click',function(e){
+  if(e.target.id!=='retry'||!rd.failed)return;
+  var f=rd.failed,tk=rd.tok;rd.failed=null;
+  appendChapter(f.b,f.c,tk).then(function(){if(tk===rd.tok)maybeMore();});
+});
+
+/* selecting verses on the reading page */
+function tidy(t){
+  var out='',depth=0,i,ch;
+  for(i=0;i<t.length;i++){ch=t[i];if(ch==='“')depth++;else if(ch==='”'){if(depth===0)continue;depth--;}out+=ch;}
+  t=out;var opens=0;
+  for(i=0;i<t.length;i++){ch=t[i];if(ch==='‘')opens++;else if(ch==='’'&&opens>0&&!/[A-Za-z]/.test(t[i+1]||''))opens--;}
+  while(opens-->0)t+='’';
+  while(depth-->0)t+='”';
+  if(t.indexOf('‘')<0&&/[.!?,]’$/.test(t))t=t.slice(0,-1);
+  if(t[0]==='“'&&t[t.length-1]==='”'&&t.split('“').length===2&&t.split('”').length===2)t=t.slice(1,-1);
+  if(/^[a-z]/.test(t))t='…'+t;
+  return t.replace(/[,;:—]$/,'…');
+}
+function selText(){
+  var d=bookData[S.tr+':'+sel.b];if(!d)return '';
+  var out='';
+  for(var v=sel.v;v<=sel.e;v++){var t=d.c[sel.c-1][v-1];if(!t)continue;out+=(out&&!/—$/.test(out)?' ':'')+t;}
+  return out;
+}
+function markSel(){
+  var all=chaptersEl.querySelectorAll('.v.sel');for(var i=0;i<all.length;i++)all[i].classList.remove('sel');
+  if(!sel){selbar.hidden=true;return;}
+  var vs=sel.sec.querySelectorAll('.v');
+  for(i=0;i<vs.length;i++){var n=+vs[i].dataset.v;if(n>=sel.v&&n<=sel.e)vs[i].classList.add('sel');}
+  $('#selRef').textContent=refText(sel.b,sel.c,sel.v,sel.e);selbar.hidden=false;
+}
+function clearSel(){sel=null;markSel();}
+chaptersEl.addEventListener('click',function(e){
+  var sp=e.target.closest('.v');if(!sp)return;
+  var sec=sp.closest('.ch'),v=+sp.dataset.v;
+  if(sel&&sel.sec===sec&&v>=sel.v&&v<=sel.e){clearSel();return;}
+  if(sel&&sel.sec===sec&&Math.max(v,sel.e)-Math.min(v,sel.v)<5){sel.v=Math.min(v,sel.v);sel.e=Math.max(v,sel.e);}
+  else sel={b:+sec.dataset.b,c:+sec.dataset.c,v:v,e:v,sec:sec};
+  markSel();
+});
+selbar.addEventListener('click',function(e){
+  var b=e.target.closest('[data-sel]');if(!b||!sel)return;
+  var a=b.dataset.sel;
+  if(a==='clear'){clearSel();return;}
+  var raw=selText();if(!raw)return;
+  var p={b:sel.b,c:sel.c,v:sel.v,e:sel.e,t:{}};p.t[S.tr]=tidy(raw);
+  if(a==='copy')copyText(caption(p));
+  else if(a==='image'){
+    if(p.t[S.tr].length>460){toast('That is a lot of text for one image. Pick fewer verses.');return;}
+    openShare(p,null);
+  }
+});
+
+/* book and chapter picker */
+function booksHTML(){
+  function grp(from,to){var h='<div class="bk">';for(var i=from;i<to;i++)h+='<button type="button" data-book="'+i+'">'+esc(BOOKS[i])+'</button>';return h+'</div>';}
+  return '<p class="eyebrow">Choose a book</p><h3 class="lab">Old Testament</h3>'+grp(0,39)+'<h3 class="lab">New Testament</h3>'+grp(39,66);
+}
+function chaptersHTML(b){
+  var h='<button type="button" class="backbtn" data-n="books">'+IC.back+'All books</button><p class="eyebrow">'+esc(BOOKS[b])+'</p><div class="chs">';
+  for(var c=1;c<=CHAPS[b];c++)h+='<button type="button" data-ch="'+c+'" data-b="'+b+'" aria-label="'+esc(chapText(b,c))+'">'+c+'</button>';
+  return h+'</div>';
+}
+$('#pick').addEventListener('click',function(){openSheet('pick',booksHTML(),'Choose a book and chapter');});
+
+/* saved */
+/* ---------- on the home screen (the app build only) ---------- */
+var installEvt=null;
+function installedApp(){try{return !!((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true);}catch(e){return false;}}
+if(STANDALONE){
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();installEvt=e;});
+  window.addEventListener('appinstalled',function(){installEvt=null;});
+}
+function installHTML(){
+  if(!STANDALONE||installedApp())return '';
+  var ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var why=' It then opens full screen like any other app, and keeps working without a signal.';
+  var h='<div class="install"><p class="eyebrow">Put '+NAME+' on your home screen</p>';
+  if(installEvt)h+='<p class="fine tight">One tap.'+why+'</p><div class="row" style="margin-top:12px"><button type="button" class="btn primary" id="doInstall">Install '+NAME+'</button></div>';
+  else if(ios)h+='<p class="fine tight">In Safari, tap the Share button, then “Add to Home Screen”.'+why+'</p>';
+  else h+='<p class="fine tight">Open your browser’s menu and choose “Install app” or “Add to Home screen”.'+why+'</p>';
+  return h+'</div>';
+}
+function savedHTML(){
+  var h='<p class="eyebrow">Saved verses</p>',items=[];
+  P.forEach(function(p,i){if(S.saved[pid(p)])items.push(i);});
+  if(!items.length)h+='<p class="note" style="margin-top:10px">Nothing saved yet. Tap Save under a verse to keep it here.</p>';
+  else{
+    h+='<ul class="saved">';
+    items.forEach(function(i){
+      var p=P[i],ref=refText(p.b,p.c,p.v,p.e);
+      h+='<li><button type="button" class="open" data-open="'+i+'"><span class="r">'+esc(ref)+'</span><span class="x">'+esc(excerpt(p.t[S.tr],92))+'</span></button>'+
+         '<button type="button" class="rm" data-unsave="'+i+'" aria-label="Remove '+esc(ref)+'">'+IC.close+'</button></li>';
+    });
+    h+='</ul>';
+  }
+  h+=installHTML();
+  h+='<p class="fine">'+NAME+' is a working prototype with '+P.length+' hand-picked passages. Scripture is from the Berean Standard Bible and the King James Version, both public domain. The short context notes are AI-written drafts. The longer commentary is public-domain text from Calvin, Matthew Henry, Gill, Clarke, Keil & Delitzsch and Jamieson, Fausset & Brown, picked out by a script and spot-checked. Plain misprints in the old editions are mended; nothing else is reworded.</p>';
+  if(PICS.length){
+    h+='<details class="about"><summary>Picture credits ('+PICS.length+')</summary>'+
+      '<p class="fine tight" style="margin-bottom:10px">Photographs by U.S. government agencies: the Fish and Wildlife Service, National Park Service, NOAA, Geological Survey and NASA. Each is credited as the agency credited it.</p><ul class="credits">'+
+      PICS.slice().sort(function(a,b){return a.place<b.place?-1:1;}).map(function(pc){return '<li>'+esc(pc.place)+'<span>'+esc(pc.credit)+'</span></li>';}).join('')+
+      '</ul></details>';
+  }
+  return h;
+}
+$('#btnSaved').addEventListener('click',function(){openSheet('saved',savedHTML(),'Saved verses');});
+function showInFeed(i){
+  closeSheet();setView('feed');
+  var c=makeCard(i);
+  cards.splice(active+1,0,c);
+  feedEl.insertBefore(c.el,cards[active+2]?cards[active+2].el:null);
+  reindex();io.observe(c.el);hydrate(c);
+  requestAnimationFrame(function(){feedEl.scrollTo({top:c.el.offsetTop,behavior:reduce?'auto':'smooth'});});
+}
+
+sheetBody.addEventListener('click',function(e){
+  var t=e.target.closest('button');if(!t)return;
+  var d=t.dataset;
+  if(sheetKind==='notes'){
+    var p=sheet._p;
+    if(d.n==='chapter')openReaderAt(p.b,p.c,{b:p.b,c:p.c,v:p.v,e:p.e});
+    else if(d.n==='share')openShare(p,sheet._plot,sheet._pic);
+    else if(d.cm)toggleCm(t);
+    else if(d.more){var tx=$('#cmText');if(tx)tx.classList.remove('clamp');t.hidden=true;}
+  }else if(sheetKind==='share'&&share){
+    if(d.shape){share.shape=S.shape=d.shape;store.set('shape',d.shape);}
+    else if(d.bg==='next'){share.pi=(share.pi+1)%share.pics.length;}
+    else if(d.bg){share.mode=S.bg=d.bg;store.set('bg',d.bg);}
+    else if(d.plot){share.plot=plotById(d.plot);}
+    if(d.shape||d.bg||d.plot){
+      syncShareControls();paintShare();
+      if(d.bg==='next'){var nb=$('[data-bg="next"]',sheetBody);if(nb)try{nb.focus({preventScroll:true});}catch(e){}}
+    }
+    else if(t.id==='doSave')doSave();
+    else if(t.id==='doShare')doNative();
+    else if(t.id==='doCopy')copyText(caption(share.p),$('#copyBox'));
+  }else if(sheetKind==='pick'){
+    if(d.n==='books'){sheetBody.innerHTML=booksHTML();sheetBody.scrollTop=0;}
+    else if(d.book!=null){
+      var b=+d.book;
+      if(CHAPS[b]===1){closeSheet();openChapter(b,1);}
+      else{sheetBody.innerHTML=chaptersHTML(b);sheetBody.scrollTop=0;}
+    }else if(d.ch){closeSheet();openChapter(+d.b,+d.ch);}
+  }else if(sheetKind==='saved'){
+    if(t.id==='doInstall'){
+      if(installEvt){var ev=installEvt;installEvt=null;try{ev.prompt();}catch(e){}sheetBody.innerHTML=savedHTML();}
+    }
+    else if(d.open!=null)showInFeed(+d.open);
+    else if(d.unsave!=null){
+      var key=pid(P[+d.unsave]);delete S.saved[key];persistSaved();
+      sheetBody.innerHTML=savedHTML();
+      cards.forEach(function(o){if(o.on&&o.i===+d.unsave){var bt=$('[data-act="save"]',o.el);if(bt){bt.setAttribute('aria-pressed','false');bt.lastChild.textContent='Save';}}});
+    }
+  }
+});
+
+/* ---------- views, translation, keys ---------- */
+var tabFeed=$('#tabFeed'),tabRead=$('#tabRead'),btnTr=$('#btnTr');
+function setView(v,skipOpen){
+  app.dataset.view=v;
+  feedEl.classList.toggle('off',v!=='feed');readerEl.classList.toggle('off',v!=='read');
+  feedEl.inert=v!=='feed';readerEl.inert=v!=='read';
+  tabFeed.setAttribute('aria-selected',v==='feed');tabRead.setAttribute('aria-selected',v==='read');
+  if(v!=='read')selbar.hidden=true;else if(sel)selbar.hidden=false;
+  if(v==='read'&&!skipOpen&&!rd.first){
+    var pos=store.get('pos',null),p=P[cards[active].i];
+    if(pos&&BOOKS[pos.b]&&pos.c>=1&&pos.c<=CHAPS[pos.b])openChapter(pos.b,pos.c);else openChapter(p.b,p.c);
+  }
+  if(v==='feed')refitAll();
+}
+tabFeed.addEventListener('click',function(){setView('feed');});
+tabRead.addEventListener('click',function(){setView('read');});
+function paintTr(){
+  var other=S.tr==='bsb'?'kjv':'bsb';
+  btnTr.textContent=TRS[S.tr].abbr;
+  btnTr.setAttribute('aria-label','Translation: '+TRS[S.tr].name+'. Switch to '+TRS[other].name+'.');
+}
+btnTr.addEventListener('click',function(){
+  S.tr=S.tr==='bsb'?'kjv':'bsb';store.set('tr',S.tr);paintTr();rerenderCards();
+  if(rd.first){var at=rd.cur||rd.first;openChapter(at.b,at.c,rd.hl&&rd.hl.b===at.b&&rd.hl.c===at.c?rd.hl:null);}
+  toast(TRS[S.tr].name);
+});
+document.addEventListener('keydown',function(e){
+  if(sheetKind){
+    if(e.key==='Escape'){closeSheet();return;}
+    if(e.key==='Tab'){
+      var f=sheet.querySelectorAll('button:not([hidden]),textarea:not([hidden]),summary');if(!f.length)return;
+      var first=f[0],last=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+    return;
+  }
+  if(app.dataset.view!=='feed'||e.metaKey||e.ctrlKey||e.altKey)return;
+  var tag=e.target&&e.target.tagName;
+  if(e.key==='ArrowDown'||e.key==='PageDown'||e.key==='j'||(e.key===' '&&tag!=='BUTTON')){e.preventDefault();go(active+1);}
+  else if(e.key==='ArrowUp'||e.key==='PageUp'||e.key==='k'){e.preventDefault();go(active-1);}
+});
+var rz=0;
+window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(refitAll,140);});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(refitAll);
+
+/* ---------- the app build keeps a copy of itself for use without a signal ---------- */
+if(STANDALONE&&'serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(){return navigator.serviceWorker.ready;}).then(function(reg){
+      var cn=navigator.connection;
+      if(cn&&cn.saveData)return;                   // Data Saver is on: fetch only what is asked for
+      var urls=PICS.map(picURL).concat(P.map(function(p){return 'c/'+pid(p)+'.json';}));
+      [S.tr].concat(Object.keys(TRS).filter(function(t){return t!==S.tr;})).forEach(function(tr){
+        for(var b=1;b<=66;b++)urls.push('t/'+tr+'/'+pad2(b)+'.json');
+      });
+      setTimeout(function(){if(reg.active)reg.active.postMessage({type:'warm',urls:urls});},4000);
+    }).catch(function(){});
+  });
+}
+
+/* ---------- start: straight into a random verse ---------- */
+paintTr();
+readerEl.inert=true;
+for(var n=0;n<4;n++)addCard();
+setActive(0);
+})();
+</script>
+</body>
+</html>
